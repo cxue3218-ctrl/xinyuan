@@ -2,1916 +2,961 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>借景明心 · 八相心园</title>
-<meta name="description" content="生辰定气局，情志归五脏。苏州园林美学 × 五志归脏 × 八字命局的心理治愈小游戏。">
-<meta name="theme-color" content="#f7f2e6">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>心园 · 借景明心</title>
+<meta name="description" content="生辰定气局，情志归五脏。每日一园，看见自己的心境四季。">
+<meta name="theme-color" content="#F7F2E6">
 <meta property="og:type" content="website">
-<meta property="og:title" content="借景明心 · 八相心园">
-<meta property="og:description" content="叠山理水，移步明心。测今日心色，看命局气局，造一座属于你的园。">
-<meta name="format-detection" content="telephone=no">
+<meta property="og:title" content="心园 · 借景明心">
+<meta property="og:description" content="不是情绪测试，是一座会随你心境生长的私人园林。">
 <style>
 :root{
-  --c0:#fdfaf3;--c1:#f5f0e4;--c2:#ede5d2;--c3:#d9cfbb;--c4:#b8ac96;--c5:#8c7f68;
-  --c6:#5e5444;--c7:#3a3228;--c8:#221e17;
-  --ink:#2c2820;--paper:#f7f2e6;
-  --s-moon:#e8e2d0;--s-lotus:#d4bbc4;--s-bamboo:#8fa888;--s-tile:#5a636b;--s-pine:#7a9e8c;
-  --r2:2px;--r4:4px;--sp4:4px;--sp8:8px;--sp12:12px;--sp16:16px;--sp24:24px;--sp32:32px;
+  --paper:#F7F2E6; --paper-2:#F1EAD9; --paper-3:#E6DCC6;
+  --moon:#E8E2D0; --tile:#5A636B; --bamboo:#8FA888; --pine:#7A9E8C;
+  --lotus:#C9A8B4; --amber:#C8A468; --rust:#A8512F;
+  --ink:#2C2820; --ink-2:#4A4336; --ink-3:#6B6354; --ink-4:#928873; --ink-5:#B8AC96;
+  --line:rgba(44,40,32,.14); --line-2:rgba(44,40,32,.24);
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --r:2px; --r2:4px; --r3:12px;
   --ease:cubic-bezier(.4,0,.2,1);
+  --serif:"Songti SC","STSong","Source Han Serif SC","Noto Serif SC",serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:var(--c2)}
-body{font-family:"Songti SC","STSong","Source Han Serif SC","Noto Serif SC",serif;color:var(--ink)}
+html,body{height:100%;overflow:hidden;background:var(--paper-3)}
+body{font-family:var(--serif);color:var(--ink);-webkit-font-smoothing:antialiased}
 #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(130% 110% at 50% -10%,var(--c1),var(--c2) 55%,var(--c3))}
-#frame{position:relative;width:100%;height:100%;max-width:480px;overflow:hidden;background:var(--paper)}
+  background:radial-gradient(140% 120% at 50% -20%,var(--paper),var(--paper-2) 50%,var(--paper-3))}
+#app{position:relative;width:100%;height:100%;max-width:480px;overflow:hidden;background:var(--paper)}
 @media(min-aspect-ratio:1/1){
-  #frame{width:min(440px,52vh);height:min(95vh,950px);border-radius:18px;
-    box-shadow:0 0 0 1px rgba(255,255,255,.55),0 28px 80px rgba(58,50,40,.28)}}
-canvas#gl,canvas#fogc{position:absolute;inset:0;width:100%;height:100%;display:block}
-canvas#fogc{touch-action:none;pointer-events:none}
-#grain{position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:multiply;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
-#vign{position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(120% 90% at 50% 40%,rgba(253,250,243,0) 38%,rgba(180,165,140,.10) 76%,rgba(140,124,96,.24) 100%)}
+  #app{width:min(432px,51vh);height:min(96vh,960px);border-radius:16px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.6),0 24px 72px rgba(74,67,54,.26)}
+}
 
-/* ── 层 ── */
-.layer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:var(--sp32) var(--sp24);opacity:0;pointer-events:none;transition:opacity .95s var(--ease)}
-.layer.on{opacity:1;pointer-events:auto}
-.layer.paper{background:linear-gradient(180deg,rgba(253,250,243,.96),rgba(247,242,230,.93) 52%,rgba(240,233,218,.96))}
-.layer.shift{justify-content:flex-start;padding-top:52px}
+/* 背景层 */
+#bg{position:absolute;inset:0;overflow:hidden}
+#bg .ly{position:absolute;inset:-4%;background-size:cover;background-position:center;
+  opacity:0;transition:opacity 1.6s var(--ease);will-change:transform,opacity}
+#bg .ly.on{opacity:1}
+#bg::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(247,242,230,.30),rgba(247,242,230,.06) 34%,rgba(247,242,230,.42) 82%,rgba(247,242,230,.76))}
+#grain{position:absolute;inset:0;pointer-events:none;opacity:.07;mix-blend-mode:multiply;z-index:2;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>")}
+#fx{position:absolute;inset:0;z-index:3;pointer-events:none}
 
-.seal{font-size:10px;letter-spacing:.46em;color:var(--c4)}
-h1{font-size:38px;letter-spacing:.2em;font-weight:400;line-height:1.32;margin:13px 0 0;color:var(--c7)}
-.sub{margin-top:13px;font-size:12px;letter-spacing:.19em;color:var(--c5);line-height:2.18;text-align:center}
-.rule{width:30px;height:1px;background:linear-gradient(90deg,transparent,var(--c4),transparent);margin:var(--sp24) 0}
-.btn{margin-top:6px;padding:12px 38px;border:1px solid rgba(92,80,64,.36);border-radius:var(--r2);
-  font-size:13px;letter-spacing:.34em;color:var(--c6);background:rgba(255,255,255,.38);
-  cursor:pointer;transition:.4s var(--ease);font-family:inherit;min-height:44px}
-.btn:hover{background:var(--c6);color:var(--c0);border-color:var(--c6);letter-spacing:.42em}
-.btn:focus-visible{outline:2px solid var(--c5);outline-offset:3px}
-.btn.dim{opacity:.28;pointer-events:none}
+/* 屏 */
+.scr{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;
+  padding:calc(var(--s7) + env(safe-area-inset-top)) var(--s5) calc(var(--s5) + env(safe-area-inset-bottom));
+  opacity:0;pointer-events:none;transition:opacity .9s var(--ease)}
+.scr.on{opacity:1;pointer-events:auto}
+.scr.mid{justify-content:center;align-items:center;text-align:center}
+.scr.veil{background:linear-gradient(180deg,rgba(247,242,230,.95),rgba(241,234,217,.90) 48%,rgba(230,220,198,.95))}
+.scr.soft{background:linear-gradient(180deg,rgba(247,242,230,.80),rgba(247,242,230,.40) 40%,rgba(241,234,217,.86))}
 
-/* ── 生辰 ── */
-.birth{display:flex;gap:var(--sp8);margin:4px 0 var(--sp24)}
-.fld{position:relative}
-.fld input,.fld select{width:75px;padding:11px 8px;text-align:center;background:rgba(255,255,255,.6);
-  border:1px solid rgba(92,80,64,.24);border-radius:var(--r2);color:var(--ink);font-size:14px;
-  font-family:inherit;outline:none;appearance:none;min-height:44px}
-.fld.w select{width:104px}
-.fld input:focus,.fld select:focus{border-color:var(--c5);background:#fff}
-.fld label{position:absolute;top:-14px;left:50%;transform:translateX(-50%);
-  font-size:9.5px;letter-spacing:.26em;color:var(--c4)}
+.kicker{font-size:10px;letter-spacing:.5em;color:var(--ink-4);text-indent:.5em}
+.h1{font-size:40px;letter-spacing:.22em;font-weight:400;line-height:1.3;margin-top:var(--s3);text-indent:.22em}
+.h2{font-size:26px;letter-spacing:.2em;font-weight:400;line-height:1.4;text-indent:.2em}
+.lead{font-size:13px;letter-spacing:.16em;line-height:2.2;color:var(--ink-3);margin-top:var(--s4)}
+.hr{width:28px;height:1px;background:var(--line-2);margin:var(--s5) auto}
+.note{font-size:11px;letter-spacing:.14em;line-height:2;color:var(--ink-4)}
 
-/* ── PAD 问卷 ── */
-#quiz{width:100%;max-width:340px}
-.q-item{margin-bottom:var(--sp24)}
-.q-text{font-size:13px;letter-spacing:.1em;color:var(--c7);margin-bottom:var(--sp12);line-height:1.9}
-.q-opts{display:flex;gap:var(--sp8);flex-wrap:wrap;justify-content:center}
-.q-opt{padding:9px 14px;border:1px solid rgba(92,80,64,.26);border-radius:var(--r2);
-  font-size:12px;letter-spacing:.1em;color:var(--c5);background:rgba(255,255,255,.42);
-  cursor:pointer;transition:.32s;min-height:44px;display:flex;align-items:center}
-.q-opt:hover{background:rgba(92,80,64,.12)}
-.q-opt.sel{background:var(--c6);color:var(--c0);border-color:var(--c6)}
-.q-opt:focus-visible{outline:2px solid var(--c5);outline-offset:2px}
-.q-prog{display:flex;gap:5px;justify-content:center;margin-bottom:var(--sp24)}
-.q-dot{width:6px;height:6px;border-radius:50%;background:var(--c3);transition:.3s}
-.q-dot.on{background:var(--c5)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;
+  padding:0 var(--s6);border:1px solid var(--line-2);border-radius:var(--r);
+  font-family:inherit;font-size:13px;letter-spacing:.34em;text-indent:.34em;
+  color:var(--ink-2);background:rgba(255,255,255,.44);cursor:pointer;
+  transition:all .4s var(--ease)}
+.btn:hover{background:var(--ink-2);color:var(--paper);border-color:var(--ink-2)}
+.btn:active{transform:scale(.985)}
+.btn:focus-visible{outline:2px solid var(--ink-4);outline-offset:3px}
+.btn.solid{background:var(--ink-2);color:var(--paper);border-color:var(--ink-2)}
+.btn.solid:hover{background:var(--ink);border-color:var(--ink)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-4);letter-spacing:.2em}
+.btn.ghost:hover{background:rgba(44,40,32,.06);color:var(--ink-2)}
+.btn[disabled]{opacity:.3;pointer-events:none}
 
-/* ── 泼墨 ── */
-#inkwrap{position:relative;width:192px;height:192px;margin:8px 0 6px}
-#inkc{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;
-  box-shadow:inset 0 0 32px rgba(92,80,64,.22),0 0 0 1px rgba(92,80,64,.22),0 12px 36px rgba(58,50,40,.16)}
-#inkhint{font-size:10px;letter-spacing:.2em;color:var(--c5);margin-bottom:var(--sp12);height:1.6em;text-align:center}
-.hues{display:flex;flex-wrap:wrap;gap:var(--sp16) 13px;justify-content:center;max-width:310px;margin-bottom:var(--sp16)}
-.hue{width:38px;height:38px;border-radius:50%;cursor:pointer;position:relative;
-  box-shadow:0 0 0 1px rgba(255,255,255,.7),0 4px 12px rgba(58,50,40,.22);transition:.36s}
-.hue:hover{transform:translateY(-4px) scale(1.08)}
-.hue:focus-visible{outline:2px solid var(--c5);outline-offset:3px}
-.hue.sel{box-shadow:0 0 0 1px #fff,0 0 0 3.5px rgba(58,50,40,.66),0 6px 16px rgba(58,50,40,.28);
-  transform:translateY(-3px) scale(1.05)}
-.hue span{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);
-  font-size:9px;letter-spacing:.1em;color:var(--c4);white-space:nowrap}
-.hue u{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:8px;
-  letter-spacing:.05em;color:#a8512f;text-decoration:none;white-space:nowrap;opacity:0;transition:.3s}
-.hue.sel u{opacity:1}
-#deg{width:240px;margin:0 0 var(--sp16);opacity:0;transition:.55s;pointer-events:none}
-#deg.on{opacity:1;pointer-events:auto}
-#deg label{display:block;font-size:10px;letter-spacing:.26em;color:var(--c4);text-align:center;margin-bottom:var(--sp8)}
-#deg input[type=range]{width:100%;appearance:none;height:2px;background:linear-gradient(90deg,var(--c3),var(--c5));outline:none}
-#deg input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;
-  background:var(--c0);border:1px solid var(--c5);box-shadow:0 2px 6px rgba(58,50,40,.24);cursor:pointer}
-#degv{text-align:center;font-size:11px;letter-spacing:.2em;color:var(--c5);margin-top:var(--sp8)}
+/* 生辰 */
+.field-row{display:flex;gap:var(--s2);justify-content:center;margin-top:var(--s5)}
+.field{position:relative}
+.field label{position:absolute;top:-15px;left:50%;transform:translateX(-50%);
+  font-size:9.5px;letter-spacing:.28em;color:var(--ink-4);white-space:nowrap}
+.field input,.field select{width:78px;min-height:48px;padding:0 var(--s2);text-align:center;
+  font-family:inherit;font-size:15px;color:var(--ink);
+  background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:var(--r);
+  outline:none;appearance:none;transition:.3s}
+.field.wide select{width:108px}
+.field input:focus,.field select:focus{border-color:var(--ink-4);background:#fff}
 
-/* ── 水墨侧影女子 ── */
-#silhouette{position:absolute;right:-2%;bottom:0;width:48%;height:64%;pointer-events:none;
-  opacity:0;transition:opacity 1.6s var(--ease),transform 1.6s var(--ease);transform:translateX(12px);z-index:4}
-#silhouette.on{opacity:1;transform:translateX(0)}
-#silhouette svg{position:absolute;bottom:0;right:0;height:100%;width:auto;
-  filter:drop-shadow(0 8px 24px rgba(58,50,40,.18))}
+/* 园中三问 */
+.qwrap{flex:1;display:flex;flex-direction:column;justify-content:center;width:100%}
+.qdots{display:flex;gap:6px;justify-content:center;margin-bottom:var(--s6)}
+.qdot{width:5px;height:5px;border-radius:50%;background:var(--ink-5);opacity:.34;transition:.4s}
+.qdot.on{opacity:1;background:var(--ink-3);transform:scale(1.3)}
+.qtext{font-size:17px;letter-spacing:.1em;line-height:2;color:var(--ink);text-align:center;
+  margin-bottom:var(--s6);min-height:3.4em}
+.qopts{display:flex;flex-direction:column;gap:var(--s3)}
+.qopt{display:flex;align-items:center;min-height:52px;padding:var(--s3) var(--s4);
+  border:1px solid var(--line);border-radius:var(--r);background:rgba(255,255,255,.5);
+  font-family:inherit;font-size:13.5px;letter-spacing:.1em;line-height:1.7;color:var(--ink-2);
+  cursor:pointer;text-align:left;transition:all .34s var(--ease)}
+.qopt:hover{background:rgba(255,255,255,.86);border-color:var(--line-2);transform:translateX(3px)}
+.qopt.sel{background:var(--ink-2);color:var(--paper);border-color:var(--ink-2)}
+.qopt:focus-visible{outline:2px solid var(--ink-4);outline-offset:2px}
 
-/* ── 对话气泡 ── */
-.say{position:absolute;left:var(--sp16);right:var(--sp16);z-index:6;
-  padding:var(--sp16) var(--sp16);background:rgba(253,250,243,.94);
-  border:1px solid rgba(120,104,80,.2);border-radius:var(--r4);
-  box-shadow:0 8px 28px rgba(58,50,40,.12);
-  opacity:0;transform:translateY(8px);transition:.65s var(--ease);pointer-events:none}
-.say.on{opacity:1;transform:translateY(0)}
-.say.btm{bottom:var(--sp24)}
-.say.mid{bottom:42%;top:auto}
-.say i{display:block;font-style:normal;font-size:9px;letter-spacing:.36em;color:#a1866a;margin-bottom:8px}
-.say p{font-size:13px;line-height:2.05;letter-spacing:.08em;color:var(--c7);min-height:1.8em}
-.say p b{color:#a8512f;font-weight:400}
+/* 心相揭示 */
+.reveal{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:var(--s5)}
+.rv-zang{font-size:10.5px;letter-spacing:.4em;color:var(--ink-4);text-indent:.4em}
+.rv-name{font-size:30px;letter-spacing:.2em;line-height:1.4;margin:var(--s3) 0;text-indent:.2em}
+.rv-poem{font-size:13px;letter-spacing:.16em;line-height:2.1;color:var(--ink-3)}
+.rv-cure{font-size:15px;letter-spacing:.12em;line-height:2.1;color:var(--ink);
+  margin-top:var(--s5);padding-left:var(--s3);border-left:2px solid var(--rust)}
 
-/* ── HUD ── */
-#hud{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .9s;z-index:5}
-#hud.on{opacity:1}
-#gname{position:absolute;top:38px;left:0;right:0;text-align:center;font-size:18px;letter-spacing:.34em;
-  color:var(--c7);text-shadow:0 1px 12px rgba(253,250,243,.96)}
-#gtip{position:absolute;top:68px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.26em;
-  color:var(--c5);text-shadow:0 1px 8px rgba(253,250,243,.96)}
-#prog{position:absolute;top:92px;left:50%;transform:translateX(-50%);width:90px;height:1px;background:rgba(92,80,64,.2)}
-#prog i{display:block;height:100%;width:0;background:var(--c5);transition:width .3s}
+/* 一式 */
+.rite{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.rite-name{font-size:20px;letter-spacing:.34em;text-indent:.34em;color:var(--ink)}
+.rite-tip{font-size:12px;letter-spacing:.16em;line-height:2;color:var(--ink-3);margin-top:var(--s3)}
+.breath-ring{position:relative;width:180px;height:180px;margin:var(--s6) 0}
+.breath-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.breath-core{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center}
+.breath-ph{font-size:19px;letter-spacing:.34em;text-indent:.34em;color:var(--ink)}
+.breath-n{font-size:40px;letter-spacing:.06em;color:var(--ink-3);margin-top:var(--s1);
+  font-variant-numeric:tabular-nums}
+.rite-meter{width:180px;height:1px;background:var(--line);margin-top:var(--s5);overflow:hidden}
+.rite-meter i{display:block;height:100%;width:0;background:var(--ink-3);transition:width .4s var(--ease)}
+.rite-count{font-size:10.5px;letter-spacing:.26em;color:var(--ink-4);margin-top:var(--s3)}
 
-/* ── 光斑 ── */
-.spark{position:absolute;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;
-  cursor:pointer;pointer-events:auto;z-index:5;
-  background:radial-gradient(circle,rgba(255,250,220,.98),rgba(255,228,150,.3) 48%,transparent 72%);
-  animation:bob 3s ease-in-out infinite}
-.spark.gone{pointer-events:none;animation:pop .55s forwards}
-@keyframes bob{0%,100%{transform:translate(0,0) scale(1);opacity:.78}50%{transform:translate(2px,-8px) scale(1.2);opacity:1}}
-@keyframes pop{to{transform:scale(3.2);opacity:0}}
+/* 落印 */
+.seal-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.seal-mark{width:58px;height:58px;border:1.5px solid rgba(168,81,47,.76);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;color:var(--rust);
+  font-size:15px;line-height:1.16;letter-spacing:.04em;margin-bottom:var(--s5)}
+.seal-line{font-size:16px;letter-spacing:.14em;line-height:2.1;color:var(--ink)}
+.seal-vow{margin-top:var(--s6);padding:var(--s4);width:100%;
+  border:1px solid var(--line);border-radius:var(--r);background:rgba(255,255,255,.52)}
+.seal-vow .t{font-size:9.5px;letter-spacing:.34em;color:var(--ink-4);margin-bottom:var(--s3)}
+.seal-vow .b{font-size:13px;letter-spacing:.08em;line-height:1.95;color:var(--ink-2);text-align:left}
+.streak{font-size:10.5px;letter-spacing:.26em;color:var(--ink-4);margin-top:var(--s5)}
 
-/* ── 画卷 ── */
-#scrollwrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:rgba(240,234,222,.97);opacity:0;pointer-events:none;transition:opacity 1.1s;z-index:7;padding:var(--sp24)}
-#scrollwrap.on{opacity:1;pointer-events:auto}
-#scrollc{width:100%;border:1px solid rgba(120,104,80,.26);box-shadow:0 16px 50px rgba(58,50,40,.22)}
-#scrolltip{margin-top:var(--sp12);font-size:10px;letter-spacing:.3em;color:var(--c5)}
+/* 年鉴 */
+.almanac{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%}
+.almanac::-webkit-scrollbar{width:0}
+.alm-head{font-size:10px;letter-spacing:.44em;color:var(--ink-4);text-align:center;text-indent:.44em}
+.alm-title{font-size:24px;letter-spacing:.2em;text-align:center;margin:var(--s3) 0 var(--s6);text-indent:.2em}
+.card{border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);
+  margin-bottom:var(--s3);background:rgba(255,255,255,.56)}
+.card .t{font-size:9px;letter-spacing:.34em;color:var(--ink-4);margin-bottom:var(--s3)}
+.card .h{font-size:14px;letter-spacing:.12em;color:var(--ink);margin-bottom:var(--s2)}
+.card .b{font-size:12.5px;letter-spacing:.05em;line-height:2.05;color:var(--ink-3)}
+.card .b b{color:var(--rust);font-weight:400}
+.card .b em{font-style:normal;color:var(--ink)}
 
-/* ── 报告 ── */
-#rep{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:8;
-  padding:44px 26px 54px;opacity:0;pointer-events:none;transition:opacity 1.1s;
-  background:linear-gradient(180deg,rgba(253,250,243,.97),rgba(247,242,230,.99))}
-#rep.on{opacity:1;pointer-events:auto}
-#rep::-webkit-scrollbar{width:0}
-.stamp{width:56px;height:56px;margin:0 auto var(--sp24);border:1.5px solid rgba(168,81,47,.78);
-  border-radius:var(--r2);display:flex;align-items:center;justify-content:center;
-  color:#a8512f;font-size:15.5px;line-height:1.14;text-align:center;letter-spacing:.06em}
-.verdict{font-size:17px;line-height:2.18;letter-spacing:.13em;text-align:center;color:var(--c7);margin-bottom:6px}
-.vsrc{font-size:9.5px;letter-spacing:.24em;color:var(--c4);text-align:center;margin-bottom:var(--sp32)}
-.card{border:1px solid rgba(120,104,80,.18);border-radius:var(--r2);padding:18px 17px;
-  margin-bottom:13px;background:rgba(255,253,247,.78)}
-.ctag{font-size:9px;letter-spacing:.34em;color:var(--c4);margin-bottom:10px}
-.ctitle{font-size:14px;letter-spacing:.13em;color:var(--c7);margin-bottom:9px}
-.ctxt{font-size:12.5px;line-height:2.06;letter-spacing:.05em;color:var(--c6)}
-.ctxt b{color:#a8512f;font-weight:400}
-.ctxt em{font-style:normal;color:var(--c7)}
-.act-row{border-left:2px solid #a8512f;padding-left:12px;margin:12px 0}
-.act-row p{font-size:12.5px;line-height:1.98;color:var(--c6);margin-bottom:8px}
-.act-row p:last-child{margin-bottom:0}
-.act-row p b{color:var(--c7);font-weight:400}
-.bars{margin-top:12px}
-.bar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.bar u{width:14px;font-size:10.5px;color:var(--c5);text-decoration:none;text-align:center}
-.bar s{flex:1;height:6px;text-decoration:none;background:rgba(92,80,64,.1);border-radius:1px;position:relative}
-.bar s i{position:absolute;left:0;top:0;bottom:0;border-radius:1px}
-.bar em{font-style:normal;font-size:9px;color:var(--c4);width:50px;text-align:right}
-.row{display:flex;gap:8px;margin-top:12px}
-.chip{flex:1;text-align:center;padding:10px 3px;border:1px solid rgba(120,104,80,.16);border-radius:var(--r2);background:rgba(255,255,255,.5)}
-.chip i{display:block;font-size:8.5px;letter-spacing:.2em;color:var(--c4);font-style:normal;margin-bottom:5px}
-.chip b{font-size:13px;font-weight:400;letter-spacing:.06em;color:var(--c7)}
-.foot{text-align:center;font-size:9.5px;letter-spacing:.24em;color:var(--c4);margin-top:var(--sp24);line-height:2.2}
-.again{display:block;margin:18px auto 0;padding:11px 30px;border:1px solid rgba(92,80,64,.3);
-  background:rgba(255,255,255,.5);color:var(--c6);font-family:inherit;font-size:12px;letter-spacing:.3em;
-  cursor:pointer;border-radius:var(--r2);min-height:44px}
-#fade{position:absolute;inset:0;background:var(--paper);pointer-events:none;opacity:0;transition:opacity .78s;z-index:9}
-#fade.on{opacity:1}
+.strip{display:flex;gap:3px;margin-top:var(--s3);height:44px;align-items:flex-end}
+.strip i{flex:1;border-radius:1px;min-height:5px;transition:.4s}
+.strip-x{display:flex;justify-content:space-between;margin-top:var(--s2);
+  font-size:9px;letter-spacing:.1em;color:var(--ink-5)}
+
+.bars{margin-top:var(--s3)}
+.bar{display:flex;align-items:center;gap:var(--s2);margin-bottom:5px}
+.bar u{width:14px;font-size:10.5px;text-decoration:none;color:var(--ink-3);text-align:center}
+.bar s{flex:1;height:5px;text-decoration:none;background:rgba(44,40,32,.09);
+  border-radius:1px;position:relative;overflow:hidden}
+.bar s i{position:absolute;inset:0 auto 0 0;border-radius:1px}
+.bar em{font-style:normal;font-size:9px;color:var(--ink-5);width:46px;text-align:right}
+
+.tally{display:flex;gap:var(--s2);margin-top:var(--s3)}
+.tally div{flex:1;text-align:center;padding:var(--s3) 2px;border:1px solid var(--line);
+  border-radius:var(--r);background:rgba(255,255,255,.44)}
+.tally div i{display:block;font-style:normal;font-size:8.5px;letter-spacing:.2em;
+  color:var(--ink-4);margin-bottom:var(--s1)}
+.tally div b{font-size:15px;font-weight:400;color:var(--ink)}
+
+.locked{text-align:center;padding:var(--s6) var(--s4);border:1px dashed var(--line-2);
+  border-radius:var(--r);background:rgba(255,255,255,.3)}
+.locked .n{font-size:30px;color:var(--ink-4);font-variant-numeric:tabular-nums}
+.locked .d{font-size:11.5px;letter-spacing:.18em;line-height:2;color:var(--ink-4);margin-top:var(--s2)}
+
+.foot{text-align:center;font-size:9.5px;letter-spacing:.22em;line-height:2.2;
+  color:var(--ink-5);margin-top:var(--s5)}
+.bottom{display:flex;gap:var(--s2);margin-top:var(--s4);flex-shrink:0}
+.bottom .btn{flex:1;padding:0 var(--s3);font-size:12px;letter-spacing:.2em;text-indent:.2em}
+
+#veil{position:absolute;inset:0;background:var(--paper);z-index:20;pointer-events:none;
+  opacity:0;transition:opacity .82s var(--ease)}
+#veil.on{opacity:1}
+#toast{position:absolute;left:50%;bottom:var(--s7);transform:translate(-50%,10px);z-index:30;
+  padding:var(--s3) var(--s5);background:rgba(44,40,32,.92);color:var(--paper);
+  font-size:12px;letter-spacing:.14em;border-radius:var(--r);opacity:0;
+  transition:.5s var(--ease);pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
-<div id="stage"><div id="frame">
-  <canvas id="gl"></canvas>
-  <canvas id="fogc"></canvas>
-  <div id="vign"></div><div id="grain"></div>
+<div id="stage"><div id="app">
+  <div id="bg"></div>
+  <canvas id="fx"></canvas>
+  <div id="grain"></div>
 
-  <!-- 水墨侧影女子 -->
-  <div id="silhouette">
-    <svg viewBox="0 0 260 540" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="ink1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2c2820" stop-opacity=".96"/>
-          <stop offset="60%" stop-color="#3a3228" stop-opacity=".92"/>
-          <stop offset="100%" stop-color="#2c2820" stop-opacity=".72"/>
-        </linearGradient>
-        <linearGradient id="sleeve1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#2c2820" stop-opacity=".88"/>
-          <stop offset="100%" stop-color="#2c2820" stop-opacity=".52"/>
-        </linearGradient>
-        <filter id="blur1" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="2.5"/>
-        </filter>
-        <filter id="blur2" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="6"/>
-        </filter>
-      </defs>
-      <!-- 落影 -->
-      <ellipse cx="130" cy="534" rx="72" ry="7" fill="#2c2820" opacity=".14" filter="url(#blur2)"/>
-      <!-- 裙摆 宽大 -->
-      <path d="M90 330 C72 370 56 430 50 490 C46 516 54 530 76 532 L184 532 C206 530 214 516 210 490 C204 430 188 370 170 330 Z" fill="url(#ink1)"/>
-      <!-- 裙摆墨晕 -->
-      <path d="M80 380 C70 420 62 468 58 508 C64 504 72 508 76 520 L90 330 Z" fill="#2c2820" opacity=".18"/>
-      <path d="M180 380 C190 420 198 468 202 508 C196 504 188 508 184 520 L170 330 Z" fill="#2c2820" opacity=".18"/>
-      <!-- 腰带 -->
-      <path d="M86 310 C108 322 152 322 174 310 L178 328 C156 342 104 342 82 328 Z" fill="#2c2820" opacity=".82"/>
-      <!-- 帔帛飘带 右侧飘动 -->
-      <path d="M174 180 C194 200 210 240 218 300 C222 326 218 340 210 344 C206 332 204 318 202 302 C196 260 186 220 170 198 Z" fill="#2c2820" opacity=".44"/>
-      <!-- 大袖左 -->
-      <path d="M92 200 C60 214 32 254 18 296 C14 312 20 320 34 318 C50 316 66 296 78 272 C90 250 96 226 100 210 Z" fill="url(#sleeve1)"/>
-      <!-- 大袖左墨边 -->
-      <path d="M18 296 C32 300 50 294 68 278 C56 296 40 316 34 318 C20 320 14 312 18 296 Z" fill="#2c2820" opacity=".36"/>
-      <!-- 大袖右 -->
-      <path d="M168 200 C196 212 224 248 238 286 C244 304 238 314 224 314 C208 312 194 294 184 270 C174 248 168 224 164 208 Z" fill="url(#sleeve1)"/>
-      <!-- 袖端衣纹 左 -->
-      <path d="M34 318 C46 312 60 306 72 294" stroke="#2c2820" stroke-width="1.4" fill="none" opacity=".42" stroke-linecap="round"/>
-      <!-- 袖端衣纹 右 -->
-      <path d="M224 314 C212 308 200 302 190 290" stroke="#2c2820" stroke-width="1.4" fill="none" opacity=".42" stroke-linecap="round"/>
-      <!-- 身躯 -->
-      <path d="M102 130 C90 148 84 172 84 200 L96 210 C104 200 112 196 130 196 C148 196 156 200 164 210 L176 200 C176 172 170 148 158 130 Z" fill="#2c2820" opacity=".9"/>
-      <!-- 衣纹竖线 -->
-      <g stroke="#2c2820" stroke-width="1.1" fill="none" opacity=".28">
-        <path d="M104 200 C102 240 98 280 94 330"/>
-        <path d="M130 196 C130 240 130 282 130 330"/>
-        <path d="M156 200 C158 240 162 280 166 330"/>
-      </g>
-      <!-- 领口 白领 -->
-      <path d="M114 128 C114 120 126 118 130 118 C134 118 146 120 146 128 L140 138 C136 134 130 132 130 132 C130 132 124 134 120 138 Z" fill="#f0ebe0" opacity=".9"/>
-      <!-- 颈 -->
-      <path d="M122 96 L138 96 L140 122 L120 122 Z" fill="#d8c8b4" opacity=".94"/>
-      <!-- 发髻 侧面 只看轮廓 -->
-      <path d="M98 52 C96 36 104 18 130 14 C158 10 170 28 168 50 C170 64 164 78 154 88 L130 98 L106 88 C96 78 90 66 98 52 Z" fill="#2c2820" opacity=".94"/>
-      <!-- 发髻高耸 -->
-      <ellipse cx="130" cy="24" rx="16" ry="20" fill="#2c2820" opacity=".9"/>
-      <path d="M114 24 C114 10 122 2 130 0 C138 2 146 10 146 24 Z" fill="#2c2820" opacity=".85"/>
-      <!-- 发簪 -->
-      <line x1="130" y1="2" x2="155" y2="-8" stroke="#c8a468" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="156" cy="-9" r="3.5" fill="#d8b47a"/>
-      <!-- 鬓发垂丝 -->
-      <path d="M106 88 C100 104 98 116 102 126" stroke="#2c2820" stroke-width="2" fill="none" opacity=".6" stroke-linecap="round"/>
-      <path d="M154 88 C160 104 162 116 158 126" stroke="#2c2820" stroke-width="2" fill="none" opacity=".6" stroke-linecap="round"/>
-      <!-- 水墨飞白 衣角边缘 -->
-      <path d="M50 492 C48 508 50 524 56 532" stroke="#2c2820" stroke-width="1.4" fill="none" opacity=".36" stroke-linecap="round"/>
-      <path d="M210 492 C212 508 210 524 204 532" stroke="#2c2820" stroke-width="1.4" fill="none" opacity=".36" stroke-linecap="round"/>
-    </svg>
-  </div>
+  <!-- 0 入园 -->
+  <section class="scr veil mid on" id="s-gate">
+    <div class="kicker">借 景 明 心</div>
+    <h1 class="h1">心园</h1>
+    <div class="hr"></div>
+    <p class="lead">生辰定气局　情志归五脏<br>一日一园　以观心之四季</p>
+    <div style="height:var(--s7)"></div>
+    <button class="btn solid" id="b-gate">入　园</button>
+    <p class="note" style="margin-top:var(--s5)">情绪数据仅存于此设备</p>
+  </section>
 
-  <!-- 对话气泡 -->
-  <div class="say btm" id="say"><i>心 园</i><p></p></div>
-
-  <div id="hud"><div id="gname"></div><div id="gtip"></div><div id="prog"><i></i></div></div>
-
-  <!-- 序 -->
-  <div class="layer paper on" id="s0">
-    <div class="seal">借 景 明 心</div>
-    <h1>八相心园</h1>
-    <div class="rule"></div>
-    <div class="sub">生辰定气局　情志归五脏<br>叠山理水　移步明心</div>
-    <div style="height:var(--sp32)"></div>
-    <button class="btn" id="b0">入　园</button>
-  </div>
-
-  <!-- 生辰 -->
-  <div class="layer paper" id="s1">
-    <div class="seal">其 一 · 先 天 气 局</div>
-    <div class="sub" style="margin-bottom:var(--sp24)">报上生辰，为你起一座荒园</div>
-    <div class="birth">
-      <div class="fld"><label>年</label><input id="by" type="number" value="1996" min="1901" max="2026"></div>
-      <div class="fld"><label>月</label><input id="bm" type="number" value="4" min="1" max="12"></div>
-      <div class="fld"><label>日</label><input id="bd" type="number" value="12" min="1" max="31"></div>
+  <!-- 1 命局 -->
+  <section class="scr veil mid" id="s-natal">
+    <div class="kicker">其 一 · 先 天 气 局</div>
+    <h2 class="h2" style="margin-top:var(--s4)">报上生辰</h2>
+    <p class="lead">五行有偏，故园有荒芜处<br>此局一次既定，终身不改</p>
+    <div class="field-row">
+      <div class="field"><label>年</label><input id="f-y" type="number" value="1996" min="1901" max="2026" inputmode="numeric"></div>
+      <div class="field"><label>月</label><input id="f-m" type="number" value="4" min="1" max="12" inputmode="numeric"></div>
+      <div class="field"><label>日</label><input id="f-d" type="number" value="12" min="1" max="31" inputmode="numeric"></div>
     </div>
-    <div class="birth" style="margin-top:-4px">
-      <div class="fld w"><label>时辰</label><select id="bh"></select></div>
+    <div class="field-row" style="margin-top:var(--s5)">
+      <div class="field wide"><label>时 辰</label><select id="f-h"></select></div>
     </div>
-    <button class="btn" id="b1">起　园</button>
-  </div>
+    <div style="height:var(--s6)"></div>
+    <button class="btn solid" id="b-natal">起　园</button>
+  </section>
 
-  <!-- PAD 情绪问卷 -->
-  <div class="layer paper" id="s_quiz">
-    <div class="seal">其 二 · 情 绪 三 维</div>
-    <div class="sub" style="margin:10px 0 var(--sp16)">三道直觉题，无对错之分</div>
-    <div class="q-prog" id="qdots"></div>
-    <div id="quiz"></div>
-  </div>
+  <!-- 2 园中三问 -->
+  <section class="scr soft" id="s-ask">
+    <div class="kicker" style="text-align:center">其 二 · 园 中 三 问</div>
+    <div class="qwrap">
+      <div class="qdots" id="q-dots"></div>
+      <p class="qtext" id="q-text"></p>
+      <div class="qopts" id="q-opts"></div>
+    </div>
+  </section>
 
-  <!-- 泼墨 -->
-  <div class="layer paper shift" id="s2">
-    <div class="seal">其 三 · 今 日 心 色</div>
-    <div class="sub" style="margin:8px 0 2px">不必思索，择二三色滴入池中</div>
-    <div id="inkwrap"><canvas id="inkc"></canvas></div>
-    <div id="inkhint"></div>
-    <div class="hues" id="hues"></div>
-    <div id="deg"><label>此 情 有 多 重</label><input id="degr" type="range" min="1" max="5" value="3"><div id="degv"></div></div>
-    <button class="btn dim" id="b2">入　境</button>
-  </div>
+  <!-- 3 心相 -->
+  <section class="scr soft" id="s-reveal">
+    <div class="reveal">
+      <div class="rv-zang" id="rv-zang"></div>
+      <h2 class="rv-name" id="rv-name"></h2>
+      <p class="rv-poem" id="rv-poem"></p>
+      <p class="rv-cure" id="rv-cure"></p>
+      <div class="bottom"><button class="btn solid" id="b-reveal" style="flex:1">行　一　式</button></div>
+    </div>
+  </section>
 
-  <!-- 心相过场 -->
-  <div class="layer" id="s3">
-    <div class="seal" id="s3t"></div>
-    <h1 id="s3n" style="font-size:28px"></h1>
-    <div class="rule"></div>
-    <div class="sub" id="s3d"></div>
-    <div style="height:var(--sp24)"></div>
-    <button class="btn" id="b3">造　园</button>
-  </div>
+  <!-- 4 一式 -->
+  <section class="scr soft" id="s-rite">
+    <div class="rite">
+      <div class="rite-name" id="rite-name"></div>
+      <p class="rite-tip" id="rite-tip"></p>
+      <div class="breath-ring" id="rite-ring">
+        <svg viewBox="0 0 180 180">
+          <circle cx="90" cy="90" r="82" fill="none" stroke="rgba(44,40,32,.10)" stroke-width="1.5"/>
+          <circle cx="90" cy="90" r="82" fill="none" stroke="#6B6354" stroke-width="1.5"
+            stroke-linecap="round" id="rite-arc" stroke-dasharray="515" stroke-dashoffset="515"/>
+        </svg>
+        <div class="breath-core">
+          <div class="breath-ph" id="rite-ph"></div>
+          <div class="breath-n" id="rite-n"></div>
+        </div>
+      </div>
+      <div class="rite-meter"><i id="rite-bar"></i></div>
+      <div class="rite-count" id="rite-count"></div>
+    </div>
+  </section>
 
-  <div id="scrollwrap"><canvas id="scrollc"></canvas><div id="scrolltip">点 画 · 看 判 语</div></div>
-  <div id="rep"></div>
-  <div id="fade"></div>
+  <!-- 5 落印 -->
+  <section class="scr soft" id="s-seal">
+    <div class="seal-wrap">
+      <div class="seal-mark">心园<br>留念</div>
+      <p class="seal-line" id="seal-line"></p>
+      <div class="seal-vow">
+        <div class="t">今 日 之 约</div>
+        <div class="b" id="seal-vow"></div>
+      </div>
+      <p class="streak" id="seal-streak"></p>
+    </div>
+    <div class="bottom">
+      <button class="btn" id="b-almanac">年　鉴</button>
+      <button class="btn solid" id="b-done">收　园</button>
+    </div>
+  </section>
+
+  <!-- 6 年鉴 -->
+  <section class="scr veil" id="s-almanac">
+    <div class="almanac" id="alm-body"></div>
+    <div class="bottom">
+      <button class="btn ghost" id="b-reset">重设生辰</button>
+      <button class="btn" id="b-back">返　回</button>
+    </div>
+  </section>
+
+  <div id="veil"></div>
+  <div id="toast"></div>
 </div></div>
 
-<script src="./lib/three.min.js"></script>
 <script>
-/* ═══════════════════════════════════════════════
-   借景明心 · 八相心园 v3
-   水墨侧影 · 五志归脏 · 苏州五色 · 独立场景
-   Web Audio · PAD情绪测评 · ACT鼓励语
-═══════════════════════════════════════════════ */
+'use strict';
 const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const rnd=(a,b)=>a+(b-a)*Math.random();
+const pad2=n=>String(n).padStart(2,'0');
+const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;};
 
-/* ── 苏州五色 CSS token ─ */
-const PAL={moon:'#e8e2d0',lotus:'#c9a8b4',bamboo:'#8fa888',tile:'#5a636b',pine:'#7a9e8c',
-  cream:'#faf5e8',wheat:'#e0d5bc',amber:'#c8a468',rust:'#a8512f',ink:'#2c2820'};
-
-/* ── 五志归脏 ── */
+/* ═══ 五志归脏 ═══ */
 const ZANG={
-  木:{zang:'肝',zhi:'怒',fn:'主疏泄，司谋断',sym:'胁胀、急躁、难入眠'},
-  火:{zang:'心',zhi:'喜',fn:'主神明，司喜乐',sym:'心悸、多梦、亢后疲'},
-  土:{zang:'脾',zhi:'思',fn:'主运化，司思虑',sym:'纳差、腹胀、念头黏'},
-  金:{zang:'肺',zhi:'悲',fn:'主气，司治节',sym:'气短、胸闷、欲叹息'},
-  水:{zang:'肾',zhi:'恐',fn:'主藏精，司恐志',sym:'腰软、夜惊、怯而退'}
+  木:{z:'肝',zhi:'怒',fn:'主疏泄，司谋断',sym:'胁胀、急躁、难入眠'},
+  火:{z:'心',zhi:'喜',fn:'主神明，司喜乐',sym:'心悸、多梦、亢后疲'},
+  土:{z:'脾',zhi:'思',fn:'主运化，司思虑',sym:'纳差、腹胀、念头黏'},
+  金:{z:'肺',zhi:'悲',fn:'主气，司治节',sym:'气短、胸闷、欲叹息'},
+  水:{z:'肾',zhi:'恐',fn:'主藏精，司恐志',sym:'腰软、夜惊、怯而退'}
 };
 const SHENG={木:'火',火:'土',土:'金',金:'水',水:'木'};
 const MOTHER={火:'木',土:'火',金:'土',水:'金',木:'水'};
 const KE={木:'土',土:'水',水:'火',火:'金',金:'木'};
-const EL_COLOR={木:'#8fa888',火:'#b8566a',土:'#c8a468',金:'#9fa6ac',水:'#7fa3b8'};
+const EL_C={木:'#8FA888',火:'#C08A8A',土:'#C8A468',金:'#A8AEB4',水:'#8AA6B8'};
 const EL_HUE={木:'竹青',火:'朱赤',土:'秋香',金:'月白',水:'天青'};
 const EL_ACT={
-  木:'晨起面东站三分钟；案头养一株文竹；多着素青与湖绿。',
-  火:'日落前晒十分钟阳光；点一支果木香；多着妃色与暖橘。',
-  土:'今日吃一顿热的、软的、慢的；西南角置素陶；多着秋香与米白。',
-  金:'清空桌面一角，只留一物；做十次深长呼吸，重呼轻吸；多着月白与淡灰。',
-  水:'睡前温水泡脚；东北角置一碗清水；多着天青与黛蓝。'
+  木:'晨起面东站三分钟，让视线落在远处的绿上；案头添一株文竹。',
+  火:'日落前晒十分钟太阳；点一支果木香，让暖意留在房间里。',
+  土:'今日吃一顿热的、软的、慢的；手机放远，专心咀嚼。',
+  金:'清空桌面一角，只留一物；做十次深长呼吸，呼比吸长。',
+  水:'睡前温水泡脚十分钟；东北角置一碗清水。'
 };
 
-/* ── PAD 三维情绪问卷 ── */
-const QUIZ=[
-  {dim:'P',q:'现在，你内心的主色调更接近哪个？',opts:[
-    {l:'灰蒙蒙，有点沉',v:-2},{l:'平平淡淡，没起伏',v:-1},
-    {l:'还算稳',v:1},{l:'有一点亮',v:2},{l:'挺明亮的',v:3}]},
-  {dim:'A',q:'你此刻身体的感觉更接近哪个？',opts:[
-    {l:'倦，想躺',v:-2},{l:'静，不想动',v:-1},
-    {l:'还好，正常',v:1},{l:'有点想走动',v:2},{l:'有点坐不住',v:3}]},
-  {dim:'D',q:'你今天对自己的掌控感是？',opts:[
-    {l:'很飘，不知所措',v:-2},{l:'有点模糊',v:-1},
-    {l:'大致清楚',v:1},{l:'比较确定',v:2},{l:'很笃定',v:3}]}
-];
-
-/* ── 八相 ── */
+/* ═══ 八相 ═══ */
 const XIANG=[
- {k:'anx',name:'漏窗 · 囚澜',pole:'阴',emo:'焦虑',emo2:'惊惧难定',hue:'#7fa3b8',hn:'天青',el:'水',
-  padMatch:p=>p.P<0&&p.A>0&&p.D<0,
-  zhiTxt:'恐伤肾，志不宁',
-  desc:'白墙高耸，树影狂乱<br>先框住它，再看它',
-  sky:[.58,.68,.74],water:[.38,.54,.60],stone:[.64,.78,.80],murk:.28,fog:.62,warm:.18,
-  scene:'wipe',
-  act_cure:'你的焦虑是真实的，不需要假装它不存在。',
-  act_cbt:'做一次<b>概率日历</b>：写下最怕的那件事，再把它发生的可能性标成百分比。焦虑把 5% 讲成 95%，写下来之后你会看见差距。',
-  act_do:'今夜把手机放到房间另一端，给自己一段「无法立刻查看」的三十分钟。这是练习：你不查看，世界也不塌。',
-  act_body:'取<b>天青</b>之色。睡前温水泡脚十分钟，然后在东北角放一碗清水——水气流通，肾志渐定。',
-  act_link:'试着说：「这件事让我担心，我需要多一点时间想清楚。」不解释，不道歉，这就够了。',
-  song:'隔墙花影动，疑是玉人来'},
+{k:'anx',n:'漏窗 · 囚澜',pole:'阴',emo:'焦虑',el:'水',
+ poem:'隔墙花影动，疑是玉人来',
+ cure:'你的焦虑是真实的，不需要假装它不存在。',
+ mech:'边界化 Containment',
+ read:'焦虑的本质不是危险本身，是「不确定」。大脑为了保护你，把所有模糊的可能性都预演成最坏的那个。',
+ berg:'表层是反复确认与检查，往下是<b>对确定感的极度渴求</b>，再往下，是「若我不盯紧，就会被辜负」的旧信念。',
+ cbt:'做一次<em>概率校准</em>：把你最怕的那件事写下来，诚实标上它真实发生的百分比。焦虑最擅长把 5% 讲成 95%——写下来，你会看见这个差距。',
+ vow:'今夜把手机放到房间另一端，给自己一段「无法立刻查看」的三十分钟。这是在练习：你不盯着，世界也不会塌。',
+ rite:{t:'框　景',tip:'把墙上乱影，一一收进窗格',kind:'tap',need:5}},
 
- {k:'sad',name:'枕流 · 听雨',pole:'阴',emo:'悲伤',emo2:'低落难舍',hue:'#9c8fae',hn:'藕荷',el:'金',
-  padMatch:p=>p.P<-1&&p.A<0,
-  zhiTxt:'悲伤肺，气不宣',
-  desc:'一池水停了太久<br>你要做的，只是让它流',
-  sky:[.56,.52,.62],water:[.34,.32,.42],stone:[.68,.66,.76],murk:.55,fog:.38,warm:.11,
-  scene:'flow',
-  act_cure:'悲伤不需要被治好，它需要被走完。',
-  act_cbt:'给悲伤一个<b>限时容器</b>：定十五分钟，允许自己彻底沉下去，不评判不打断。时间到，起身喝温水开窗。这是宣泄，不是沉溺——两者的区别在于你有没有设边界。',
-  act_do:'今晚听一段真实雨声，注意力只放在「滴落」那一瞬，不要追那些念头，就听水的声音。',
-  act_body:'取<b>藕荷</b>之色。长叹一口气，再慢慢吸——这是肺在自救。多穿月白、淡灰，减少一件事，给自己一个空午后。',
-  act_link:'不用解释你为什么难过。你可以只说：「我今天有点低落，你能陪我坐一会儿吗？」',
-  song:'水流不争先，争的是滔滔不绝'},
+{k:'sad',n:'枕流 · 听雨',pole:'阴',emo:'悲伤',el:'金',
+ poem:'水流不争先，争的是滔滔不绝',
+ cure:'悲伤不需要被治好，它需要被走完。',
+ mech:'宣泄 Catharsis',
+ read:'悲伤是一种「减速」机制。它让你慢下来，是为了让你有时间承认失去——跳过这一步的人，往往要用更久才能走出来。',
+ berg:'表层是提不起劲，往下是<b>未被好好承认的失落</b>，再往下，是「我的难过会麻烦别人」的自我消音。',
+ cbt:'给悲伤一个<em>限时容器</em>：定十五分钟，允许自己彻底沉下去，不评判不打断。时间到，起身喝温水、开窗。宣泄与沉溺的区别，只在于有没有边界。',
+ vow:'今晚听一段真实的雨声，把注意力只放在「滴落」那一瞬。不要追那些念头，只听水声。',
+ rite:{t:'听　雨',tip:'什么都不必做，听满三十滴',kind:'wait',need:30}},
 
- {k:'ang',name:'扫竹 · 清暑',pole:'阴',emo:'愤怒',emo2:'焦躁难平',hue:'#b8566a',hn:'妃色',el:'木',
-  padMatch:p=>p.P<0&&p.A>1,
-  zhiTxt:'怒伤肝，气上逆',
-  desc:'风把竹子吹折了<br>断枝，也能落成花',
-  sky:[.72,.50,.50],water:[.44,.30,.32],stone:[.80,.62,.60],murk:.30,fog:.30,warm:.46,
-  scene:'break',
-  act_cure:'你生气，是因为有一条界被跨过了。这很合理。',
-  act_cbt:'把愤怒翻译成<b>需求</b>：不说「你总是这样」，改说「在这件事上，我需要你提前告诉我」。愤怒本质是一个被忽视的需求——准确说出来，比爆发有用得多。',
-  act_do:'先去快走十五分钟，让肾上腺素有地方去。然后再决定要不要发那条消息、要不要开那个口。',
-  act_body:'取<b>竹青</b>之色。肝气上逆时，多用眼睛看绿的东西——远处的树，案头的植物；呼吸时，呼比吸长，帮气往下走。',
-  act_link:'你不必现在就说清楚。可以先说：「我现在有点激动，给我一点时间，我想好了再跟你谈。」',
-  song:'狂风扫竹去，落地尽是花'},
+{k:'ang',n:'扫竹 · 清暑',pole:'阴',emo:'愤怒',el:'木',
+ poem:'狂风扫竹去，落地尽是花',
+ cure:'你生气，是因为有一条界被跨过了。这很合理。',
+ mech:'重构 Reframing',
+ read:'愤怒是最被误解的情绪。它其实是一个信号灯：有什么重要的东西被侵犯了。压住它没用，要读懂它在指哪里。',
+ berg:'表层是暴躁与挑刺，往下是<b>界限被侵犯后的委屈</b>，再往下，是「我的需要从来排在最后」的长期忍让。',
+ cbt:'把愤怒翻译成<em>一句具体请求</em>：不说「你总是这样」，改说「在这件事上，我需要你提前告诉我」。愤怒的解药不是压制，是准确表达。',
+ vow:'先去快走十五分钟，让肾上腺素有地方去。然后再决定要不要发那条消息、要不要开那个口。',
+ rite:{t:'扫　竹',tip:'划过竹丛，借这阵风',kind:'swipe',need:6}},
 
- {k:'lost',name:'月洞 · 拨云',pole:'阴',emo:'迷茫',emo2:'思虑无解',hue:'#8d9aa0',hn:'黛青',el:'土',
-  padMatch:p=>p.D<0&&p.A<0,
-  zhiTxt:'思伤脾，气结中',
-  desc:'雾遮了满院<br>只留一扇门，就够了',
-  sky:[.62,.63,.64],water:[.42,.43,.44],stone:[.72,.73,.73],murk:.38,fog:.88,warm:.16,
-  scene:'wipe',
-  act_cure:'看不清路的时候，站住，也是一种走法。',
-  act_cbt:'迷茫多数时候不是「没有答案」，而是<b>答案太多、太吵</b>。做一次减法：写下三件「就算想清楚了也不会让我今天做什么」的事，把它们从今天的脑子里暂时移走。',
-  act_do:'只写三行：今天我真正在意的是什么 / 我在替谁活 / 我可以先放下哪一件。不需要答案完整，有这三行就够出发了。',
-  act_body:'取<b>秋香</b>之色。脾主运化，吃一顿规律的饭，把手机放远，专心咀嚼——这是最小的「扎地气」练习。',
-  act_link:'你不需要想通了再开口。可以说：「我最近有些迷糊，还没理清，但想跟你聊聊。」',
-  song:'拨云见月洞，门后自有山'},
+{k:'lost',n:'月洞 · 拨云',pole:'阴',emo:'迷茫',el:'土',
+ poem:'拨云见月洞，门后自有山',
+ cure:'看不清路的时候，站住，也是一种走法。',
+ mech:'聚焦 Focusing',
+ read:'迷茫往往不是「没有答案」，而是答案太多、太吵。信息过载会瘫痪决策系统——这时候需要的不是更多思考，是减法。',
+ berg:'表层是选择困难，往下是<b>角色过载</b>：好女儿、好员工、好伴侣都扮演得妥帖，唯独「我是谁」被压在最底层。',
+ cbt:'做一次<em>注意力减法</em>：未来二十四小时，对一切非必要的请求说「我再想想」。不是拒绝，是给自己留出听见自己的空隙。',
+ vow:'只写三行：今天我真正在意的是什么 / 我在替谁活 / 我可以先放下哪一件。不需要答案完整。',
+ rite:{t:'拨　云',tip:'长按门内微光，只看这一处',kind:'hold',need:260}},
 
- {k:'joy',name:'承晖 · 摇影',pole:'阳',emo:'喜悦',emo2:'明亮舒展',hue:'#d8a95c',hn:'杏黄',el:'火',
-  padMatch:p=>p.P>1&&p.A>0,
-  zhiTxt:'喜通心，神得养',
-  desc:'光穿过飞檐<br>把它，按在墙上留住',
-  sky:[.94,.82,.60],water:[.54,.52,.44],stone:[.92,.86,.72],murk:.08,fog:.22,warm:.90,
-  scene:'catch',
-  act_cure:'今天这份好，是你自己挣来的，不是运气。',
-  act_cbt:'心理学里有一个概念叫<b>「品味」（Savoring）</b>：好情绪不会自动留下来，需要你主动停下来感知它。把今天最好的三十秒用五感写下来——你看见什么、听见什么、身体哪里是松的。',
-  act_do:'今天主动把这份好分给一个人——喜悦在传递时才会变长。不是炫耀，是分享：「今天有件很小但让我高兴的事，想跟你说。」',
-  act_body:'取<b>杏黄</b>之色。心气旺时，注意收一收——别一口气把能量全用完。傍晚静坐五分钟，让兴奋在身体里沉下来变成踏实。',
-  act_link:'试着说：「今天有件事让我很开心，想跟你说一下。」好情绪说出口才会留下来。',
-  song:'竹影摇金屑，此刻宜收藏'},
+{k:'joy',n:'承晖 · 摇影',pole:'阳',emo:'喜悦',el:'火',
+ poem:'竹影摇金屑，此刻宜收藏',
+ cure:'今天这份好，是你自己挣来的，不是运气。',
+ mech:'品味 Savoring',
+ read:'好情绪有个特点：如果不主动去「品」，它会蒸发得比坏情绪快得多。这不是你不懂感恩，是大脑天生对威胁更敏感。',
+ berg:'表层是心情很好，往下是<b>被看见、被回应的满足</b>。这份体验值得存档，成为低谷时可以调取的证据。',
+ cbt:'做一次<em>五感定格</em>：把今天最好的三十秒写下来——你看见什么、听见什么、身体哪里是松的。好情绪不写会蒸发。',
+ vow:'今天主动把这份好分给一个人。不是炫耀，是分享：「今天有件很小但让我高兴的事，想跟你说。」',
+ rite:{t:'承　光',tip:'点住墙上的光，留住它',kind:'tap',need:6}},
 
- {k:'calm',name:'寄畅 · 绝尘',pole:'阳',emo:'宁静',emo2:'松弛安然',hue:'#6f9e8c',hn:'松石',el:'木',
-  padMatch:p=>p.P>0&&p.A<0&&p.D>0,
-  zhiTxt:'木气柔，肝自平',
-  desc:'水静得几乎不动<br>跟着它呼吸，就好',
-  sky:[.64,.76,.70],water:[.36,.56,.52],stone:[.68,.84,.78],murk:.05,fog:.26,warm:.34,
-  scene:'flow',
-  act_cure:'什么都不用做的时刻，也算过得很好。',
-  act_cbt:'宁静是一种需要被<b>「锚定」</b>的状态，因为它会被日常消磨掉。记住此刻呼吸的深度和肩膀的位置——下次心慌时，先把身体调回这个姿势，情绪会跟上来。',
-  act_do:'不要用这份平静去赶进度。今天允许有一件事「做到刚好就行」，不需要优秀，只需要完成。',
-  act_body:'取<b>松石绿</b>之色。案头添一株绿植，窗边晒二十分钟太阳——木气滋养，不需要大动作，只需要规律。',
-  act_link:'不是每次都要说什么。今天可以只是陪着，然后说：「我挺好的，你呢？」',
-  song:'池静无风起，心闲即绝尘'},
+{k:'calm',n:'寄畅 · 绝尘',pole:'阳',emo:'宁静',el:'木',
+ poem:'池静无风起，心闲即绝尘',
+ cure:'什么都不用做的时刻，也算过得很好。',
+ mech:'正念 Mindfulness',
+ read:'平静不是没有情绪，是情绪不再劫持你。这种状态很珍贵但也很脆弱——它需要被「锚定」，否则会被日常悄悄磨掉。',
+ berg:'表层是没什么情绪，往下是<b>难得的自我接纳</b>：此刻你不需要被证明，也不需要被安慰。',
+ cbt:'做一次<em>锚点封存</em>：记住此刻呼吸的深度、肩膀的位置。下次心慌时，先把身体调回这个姿势——情绪会跟上来。',
+ vow:'不要用这份平静去赶进度。今天允许有一件事「做到刚好就行」，不需要优秀，只需要完成。',
+ rite:{t:'调　息',tip:'吸四、屏七、呼八，共三息',kind:'breath',need:3}},
 
- {k:'hope',name:'寻芳 · 留春',pole:'阳',emo:'期待',emo2:'憧憬萌动',hue:'#c98a94',hn:'妃粉',el:'水',
-  padMatch:p=>p.P>0&&p.A>0&&p.D>0,
-  zhiTxt:'志得舒，肾气充',
-  desc:'露珠悬着还没落<br>轻轻一碰，春就来了',
-  sky:[.90,.74,.76],water:[.52,.46,.50],stone:[.90,.80,.80],murk:.12,fog:.36,warm:.66,
-  scene:'catch',
-  act_cure:'你心里那个还没说出口的愿，是真的。',
-  act_cbt:'期待需要<b>路径感</b>，不然会变成焦虑。把你最想要的那件事拆成三步，只看第一步：「本周可以做的最小一件事是什么？」有路径的期待叫计划，没路径的才会把人架空。',
-  act_do:'今天就把那一步做掉，哪怕只花十分钟。开始比完美更重要——你做了，这个愿就开始变真的了。',
-  act_body:'取<b>妃粉</b>之色。肾主志，志萌动时需要根——今晚泡脚，让热意从脚底升上来，把期待扎进地里。',
-  act_link:'不必等确定了再开口。你可以先说：「有件事我很期待，还没准备好，但想让你知道。」',
-  song:'一枝寒梅破，春从此处来'},
+{k:'hope',n:'寻芳 · 留春',pole:'阳',emo:'期待',el:'水',
+ poem:'一枝寒梅破，春从此处来',
+ cure:'你心里那个还没说出口的愿，是真的。',
+ mech:'希望理论 Hope',
+ read:'期待和焦虑是一对孪生兄弟，区别只在于有没有「路径」。有路径的期待叫计划，没路径的期待会变成焦虑。',
+ berg:'表层是跃跃欲试，往下是<b>「我值得更好」的萌动</b>，再往下，是一直没敢正式许下的那个愿。',
+ cbt:'给期待<em>接上路径</em>：把那件事拆成三步，只看第一步——「本周可以做的最小一件事是什么？」',
+ vow:'今天就把那一步做掉，哪怕只花十分钟。开始比完美更重要——你做了，这个愿就开始变真的了。',
+ rite:{t:'留　春',tip:'轻触将落的露珠',kind:'tap',need:4}},
 
- {k:'firm',name:'立峰 · 骨挺',pole:'阳',emo:'笃定',emo2:'沉稳有力',hue:'#7d8a5e',hn:'竹青',el:'金',
-  padMatch:p=>p.D>1&&p.P>0,
-  zhiTxt:'气得治，肺魄定',
-  desc:'这石头千疮百孔<br>透光的地方，最好看',
-  sky:[.70,.74,.58],water:[.44,.50,.42],stone:[.76,.82,.64],murk:.10,fog:.24,warm:.50,
-  scene:'wipe',
-  act_cure:'你不必完整，才稳得住。',
-  act_cbt:'做一次<b>证据归档</b>：写下三件「我曾以为撑不过去，却撑过去了」的事。底气不是天赋，是可以翻出来查证的历史。每次觉得自己不行的时候，翻一翻这个档案。',
-  act_do:'今天把这份稳，借给一个正在慌的人——不需要给建议，只需要在场。你站着，就是在帮他们站着。',
-  act_body:'取<b>月白</b>之色。肺主气，笃定时的呼吸是有重量的——慢慢吸，屏气数三，再慢慢呼。把这口气的重量记在身体里。',
-  act_link:'你已经有答案了。可以直接说出来，不需要先问「你觉得呢」，你的判断本来就值得被听到。',
-  song:'瘦皱透且漏，残处最玲珑'}
+{k:'firm',n:'立峰 · 骨挺',pole:'阳',emo:'笃定',el:'金',
+ poem:'瘦皱透且漏，残处最玲珑',
+ cure:'你不必完整，才稳得住。',
+ mech:'完形整合 Gestalt',
+ read:'真正的稳定不来自「我很好」，而来自「我知道自己哪里不好，也还是可以往前走」。接纳缺口比填补缺口更省力。',
+ berg:'表层是从容，往下是<b>与自己缺口的和解</b>：你不再需要完整，才真正稳得住。',
+ cbt:'做一次<em>证据归档</em>：写下三件「我曾以为撑不过去，却撑过去了」的事。底气不是天赋，是可以翻出来查证的历史。',
+ vow:'今天把这份稳，借给一个正在慌的人——不需要给建议，只需要在场。你站着，就是在帮他们站着。',
+ rite:{t:'叠　石',tip:'把散石一块块叠成峰',kind:'tap',need:4}}
 ];
-const BY_K=Object.fromEntries(XIANG.map(x=>[x.k,x]));
-const DEGW=['','一丝','有些','分明','很重','压得慌'];
+const BYK=Object.fromEntries(XIANG.map(x=>[x.k,x]));
 
-/* ── 干支算法 ── */
+/* ═══ 园中三问（投射式） ═══ */
+const ASKS=[
+{dim:'P',q:'走进园子，你先看见的是——',opts:[
+  {l:'一池不动的水',v:-2},{l:'高处的墙',v:-1},
+  {l:'半开的门',v:1},{l:'枝上的光',v:2}]},
+{dim:'A',q:'此刻若要坐一会儿，你想坐在——',opts:[
+  {l:'廊下阴处，不想动',v:-2},{l:'临水石阶，看着水',v:-1},
+  {l:'亭中，风穿过来',v:1},{l:'不想坐，想走一走',v:2}]},
+{dim:'D',q:'这园子里若有一处让你不适，那是——',opses:0,opts:[
+  {l:'雾太重，看不清路',v:-2},{l:'太静了，有点空',v:-1},
+  {l:'没有，都还好',v:1},{l:'哪里都好，我知道往哪走',v:2}]}
+];
+
+/* ═══ 干支 ═══ */
 const GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 const ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-const GAN_EL=['木','木','火','火','土','土','金','金','水','水'];
-const ZHI_EL=['水','土','木','木','土','火','火','土','金','金','土','水'];
-function ganzhi(y,m,d,h){
+const GEL=['木','木','火','火','土','土','金','金','水','水'];
+const ZEL=['水','土','木','木','土','火','火','土','金','金','土','水'];
+function natal(y,m,d,h){
   let yy=(m<2||(m===2&&d<4))?y-1:y;
   const ys=((yy-4)%10+10)%10, yz=((yy-4)%12+12)%12;
   const cut=[0,6,4,6,5,6,6,7,8,8,8,7,7];
   let mo=(d<cut[m])?m-1:m; if(mo<1)mo=12;
-  const mIdx=(mo-2+12)%12, head=[2,4,6,8,0][ys%5];
-  const ms=(head+mIdx)%10, mz=(mIdx+2)%12;
+  const mi=(mo-2+12)%12, head=[2,4,6,8,0][ys%5];
+  const ms=(head+mi)%10, mz=(mi+2)%12;
   const days=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(2000,0,1))/864e5);
   const ds=((4+days)%10+10)%10, dz=((6+days)%12+12)%12;
   const hz=Math.floor(((h+1)%24)/2), hs=(ds*2+hz)%10;
   const cnt={木:0,火:0,土:0,金:0,水:0};
   const gw=[1,1.2,1.6,1], zw=[1,1.6,1.2,1];
-  [ys,ms,ds,hs].forEach((i,k)=>cnt[GAN_EL[i]]+=gw[k]);
-  [yz,mz,dz,hz].forEach((i,k)=>cnt[ZHI_EL[i]]+=zw[k]);
+  [ys,ms,ds,hs].forEach((i,k)=>cnt[GEL[i]]+=gw[k]);
+  [yz,mz,dz,hz].forEach((i,k)=>cnt[ZEL[i]]+=zw[k]);
   const ord=Object.keys(cnt).sort((a,b)=>cnt[a]-cnt[b]);
-  return {pillars:[GAN[ys]+ZHI[yz],GAN[ms]+ZHI[mz],GAN[ds]+ZHI[dz],GAN[hs]+ZHI[hz]],
-    cnt,weak:ord[0],weak2:ord[1],strong:ord[4],
-    dayEl:GAN_EL[ds],dayGan:GAN[ds],monthEl:ZHI_EL[mz],monthZhi:ZHI[mz]};
+  return{pillars:[GAN[ys]+ZHI[yz],GAN[ms]+ZHI[mz],GAN[ds]+ZHI[dz],GAN[hs]+ZHI[hz]],
+    cnt,weak:ord[0],weak2:ord[1],strong:ord[4],dayGan:GAN[ds],dayEl:GEL[ds],
+    birth:{y,m,d,h}};
 }
-function judge(bz,x){
-  const el=x.el,tot=Object.values(bz.cnt).reduce((a,b)=>a+b,0);
-  const p=bz.cnt[el]/tot,mo=MOTHER[el],kx=Object.keys(KE).find(k=>KE[k]===el);
-  let type,head,body,fix,fixEl;
-  if(el===bz.weak||el===bz.weak2){
-    type='素弱';head=`${ZANG[el].zang}本为命中弱处`;
-    body=`命局之中<b>${el}</b>气薄（${bz.cnt[el].toFixed(1)}/${tot.toFixed(0)}），今日情志又落在<b>${ZANG[el].zhi}</b>上——${ZANG[el].zhi}伤${ZANG[el].zang}，是往最薄处再压一层。同样的事，你会比旁人更疼，这不是矫情，是体质所然。`;
-    fix=`虚则补其母：<b>${mo}</b>生<b>${el}</b>，取${EL_HUE[mo]}之色、行${mo}之事，从上游给你补水，比硬撑有用。`;fixEl=mo;
-  }else if(el===bz.strong){
-    type='素盛';head=`${ZANG[el].zang}本为命中旺处`;
-    body=`命局<b>${el}</b>气偏旺（${bz.cnt[el].toFixed(1)}/${tot.toFixed(0)}），今日情志又是<b>${ZANG[el].zhi}</b>——同处反复被点着，易由盛转亢：${ZANG[el].sym}。旺是资本，过用才成负担。`;
-    fix=`盛则泄其子：顺<b>${SHENG[el]}</b>而泄，借<b>${kx}</b>而制。取${EL_HUE[SHENG[el]]}与${EL_HUE[kx]}之色，把多出来的劲导出去。`;fixEl=SHENG[el];
+function judge(nt,x){
+  const el=x.el,tot=Object.values(nt.cnt).reduce((a,b)=>a+b,0);
+  const mo=MOTHER[el],kx=Object.keys(KE).find(k=>KE[k]===el);
+  if(el===nt.weak||el===nt.weak2)
+    return{type:'素弱',head:`${ZANG[el].z}本为命中弱处`,fixEl:mo,
+      body:`命局之中<b>${el}</b>气薄（${nt.cnt[el].toFixed(1)}／${tot.toFixed(0)}），今日情志又落在<b>${ZANG[el].zhi}</b>上——${ZANG[el].zhi}伤${ZANG[el].z}，是往最薄处再压一层。同样的事，你会比旁人更疼，这不是矫情，是体质所然。`,
+      fix:`虚则补其母：<b>${mo}</b>生<b>${el}</b>。取${EL_HUE[mo]}之色、行${mo}之事，从上游补水，比硬撑有用。`};
+  if(el===nt.strong)
+    return{type:'素盛',head:`${ZANG[el].z}本为命中旺处`,fixEl:SHENG[el],
+      body:`命局<b>${el}</b>气偏旺（${nt.cnt[el].toFixed(1)}／${tot.toFixed(0)}），今日情志又是<b>${ZANG[el].zhi}</b>——同处反复被点着，易由盛转亢：${ZANG[el].sym}。旺是资本，过用才成负担。`,
+      fix:`盛则泄其子：顺<b>${SHENG[el]}</b>而泄，借<b>${kx}</b>而制。取${EL_HUE[SHENG[el]]}之色，把多出来的劲导出去。`};
+  return{type:'中平',head:`${ZANG[el].z}在命中不偏不倚`,fixEl:nt.weak,
+    body:`命局<b>${el}</b>气居中（${nt.cnt[el].toFixed(1)}／${tot.toFixed(0)}），今日这份<b>${x.emo}</b>属情境所起，不是底子里的老症。来得快，去得也快。`,
+    fix:`平则守中：不必大动。若要调，先补命中最弱的<b>${nt.weak}</b>——那才是长年欠的账。`};
+}
+function pickXiang(pad){
+  const {P,A,D}=pad;
+  let pool;
+  if(P<0){
+    if(A>0&&D<0) pool=['anx','ang'];
+    else if(A>0) pool=['ang','anx'];
+    else if(D<0) pool=['lost','sad'];
+    else pool=['sad','lost'];
   }else{
-    type='中平';head=`${ZANG[el].zang}在命中不偏不倚`;
-    body=`命局<b>${el}</b>气居中（${bz.cnt[el].toFixed(1)}/${tot.toFixed(0)}），今日这份<b>${x.emo}</b>属情境所起，不是底子里的老症。来得快，去得也快，顺着走即可。`;
-    fix=`平则守中：不必大动。若要调，先补命中最弱的<b>${bz.weak}</b>——那才是长年欠的账。`;fixEl=bz.weak;
+    if(A>0&&D>0) pool=['hope','joy'];
+    else if(A>0) pool=['joy','hope'];
+    else if(D>0) pool=['firm','calm'];
+    else pool=['calm','firm'];
   }
-  return {type,head,body,fix,fixEl,mother:mo,vent:SHENG[el],ctrl:kx};
+  return BYK[pool[0]];
 }
 
-/* ── PAD 得分 → 心相匹配 ── */
-function padToXiang(pad,bz){
-  let best=XIANG.find(x=>x.padMatch(pad));
+/* ═══ 节气（近似） ═══ */
+const JQ=[[2,4,'立春'],[2,19,'雨水'],[3,6,'惊蛰'],[3,21,'春分'],[4,5,'清明'],[4,20,'谷雨'],
+[5,6,'立夏'],[5,21,'小满'],[6,6,'芒种'],[6,21,'夏至'],[7,7,'小暑'],[7,23,'大暑'],
+[8,8,'立秋'],[8,23,'处暑'],[9,8,'白露'],[9,23,'秋分'],[10,8,'寒露'],[10,24,'霜降'],
+[11,8,'立冬'],[11,22,'小雪'],[12,7,'大雪'],[12,22,'冬至'],[1,6,'小寒'],[1,20,'大寒']];
+function solarTerm(){
+  const d=new Date(), m=d.getMonth()+1, dd=d.getDate();
+  let best=null,bestGap=999;
+  JQ.forEach(([jm,jd,jn])=>{
+    if(jm===m&&dd>=jd){const g=dd-jd; if(g<bestGap){bestGap=g;best=jn;}}
+  });
   if(!best){
-    // 兜底：P<0选阴相，P>0选阳相
-    const pool=XIANG.filter(x=>pad.P<0?x.pole==='阴':x.pole==='阳');
-    best=pool[Math.floor(Math.random()*pool.length)];
+    const pm=m===1?12:m-1;
+    const cands=JQ.filter(j=>j[0]===pm);
+    best=cands.length?cands[cands.length-1][2]:'节气之交';
   }
   return best;
 }
 
-/* ── 状态 ── */
-const S={bazi:null,pad:{P:0,A:0,D:0},qIdx:0,qAns:{},picks:[],deg:3,x:null,jd:null,
-  trace:{wipe:0,flow:0,catch:0,breaks:0},t0:0};
+/* ═══ 存储 ═══ */
+const DB={
+  KEY:'xinyuan.v2',
+  load(){
+    try{const r=localStorage.getItem(this.KEY);return r?JSON.parse(r):null;}
+    catch(e){return null;}
+  },
+  save(d){
+    try{localStorage.setItem(this.KEY,JSON.stringify(d));return true;}
+    catch(e){return false;}
+  },
+  init(){
+    return this.load()||{natal:null,days:[],vowDone:{}};
+  },
+  wipe(){try{localStorage.removeItem(this.KEY);}catch(e){}}
+};
+let S=DB.init();
+const ST={askIdx:0,pad:{P:0,A:0,D:0},x:null,jd:null,riteOk:false};
+
+/* ═══ 背景层 ═══ */
+const ART=['anx','sad','ang','lost','joy','calm','hope','firm'];
+(function(){
+  const bg=$('#bg');
+  ART.forEach(k=>{
+    const d=document.createElement('div');
+    d.className='ly'; d.dataset.k=k;
+    d.style.backgroundImage=`url("./art/${k}.webp")`;
+    bg.appendChild(d);
+  });
+})();
+function setBg(k){
+  $$('#bg .ly').forEach(l=>l.classList.toggle('on',l.dataset.k===k));
+}
+// 视差
+let px=0,py=0,tx=0,ty=0;
+$('#app').addEventListener('pointermove',e=>{
+  const r=$('#app').getBoundingClientRect();
+  tx=((e.clientX-r.left)/r.width-.5)*2; ty=((e.clientY-r.top)/r.height-.5)*2;
+});
+(function loop(){
+  requestAnimationFrame(loop);
+  px=lerp(px,tx,.055); py=lerp(py,ty,.055);
+  const on=$('#bg .ly.on');
+  if(on) on.style.transform=`translate(${-px*14}px,${-py*10}px) scale(1.04)`;
+})();
+
+/* ═══ 粒子层 ═══ */
+const FX={parts:[],mode:null,ctx:null,dpr:1,t:0,dropCb:null,drops:0};
+(function(){
+  const c=$('#fx');
+  FX.ctx=c.getContext('2d');
+  FX.fit=()=>{
+    const r=$('#app').getBoundingClientRect();
+    FX.dpr=Math.min(devicePixelRatio,2);
+    c.width=r.width*FX.dpr; c.height=r.height*FX.dpr;
+    FX.w=r.width; FX.h=r.height;
+  };
+  FX.fit(); addEventListener('resize',FX.fit);
+  FX.set=(mode)=>{
+    FX.mode=mode; FX.parts=[]; FX.drops=0;
+    if(mode==='rain'){
+      for(let i=0;i<90;i++)FX.parts.push({x:rnd(0,FX.w),y:rnd(-FX.h,FX.h),
+        v:rnd(3.2,6.4),l:rnd(9,22),o:rnd(.14,.34)});
+    }else if(mode==='dust'){
+      for(let i=0;i<46;i++)FX.parts.push({x:rnd(0,FX.w),y:rnd(0,FX.h),
+        r:rnd(.8,2.2),v:rnd(.12,.42),ph:rnd(0,6.28),o:rnd(.2,.5)});
+    }else if(mode==='petal'){
+      for(let i=0;i<26;i++)FX.parts.push({x:rnd(0,FX.w),y:rnd(-FX.h,0),
+        r:rnd(2.4,5),v:rnd(.7,1.8),sw:rnd(.6,1.9),ph:rnd(0,6.28),o:rnd(.3,.66)});
+    }
+  };
+  (function draw(){
+    requestAnimationFrame(draw);
+    const x=FX.ctx; if(!x)return;
+    FX.t+=.016;
+    x.setTransform(FX.dpr,0,0,FX.dpr,0,0);
+    x.clearRect(0,0,FX.w,FX.h);
+    if(FX.mode==='rain'){
+      x.strokeStyle='rgba(120,134,148,1)'; x.lineWidth=1;
+      FX.parts.forEach(p=>{
+        x.globalAlpha=p.o;
+        x.beginPath(); x.moveTo(p.x,p.y); x.lineTo(p.x-1.2,p.y+p.l); x.stroke();
+        p.y+=p.v;
+        if(p.y>FX.h){
+          p.y=rnd(-60,-10); p.x=rnd(0,FX.w);
+          if(FX.dropCb) FX.dropCb();
+        }
+      });
+    }else if(FX.mode==='dust'){
+      FX.parts.forEach(p=>{
+        x.globalAlpha=p.o*(.5+.5*Math.sin(FX.t*.7+p.ph));
+        x.fillStyle='rgba(255,238,198,1)';
+        x.beginPath(); x.arc(p.x,p.y,p.r,0,6.2832); x.fill();
+        p.y-=p.v; p.x+=Math.sin(FX.t*.4+p.ph)*.22;
+        if(p.y<-8){p.y=FX.h+8;p.x=rnd(0,FX.w);}
+      });
+    }else if(FX.mode==='petal'){
+      FX.parts.forEach(p=>{
+        x.globalAlpha=p.o;
+        x.fillStyle='rgba(226,176,190,1)';
+        x.save(); x.translate(p.x,p.y); x.rotate(Math.sin(FX.t+p.ph)*.9);
+        x.beginPath(); x.ellipse(0,0,p.r,p.r*.56,0,0,6.2832); x.fill();
+        x.restore();
+        p.y+=p.v; p.x+=Math.sin(FX.t*.7+p.ph)*p.sw;
+        if(p.y>FX.h+10){p.y=rnd(-40,-10);p.x=rnd(0,FX.w);}
+      });
+    }
+    x.globalAlpha=1;
+  })();
+})();
+
+/* ═══ 音（极简，仅界面反馈） ═══ */
+let AC=null;
+function tone(f,dur,vol,type){
+  try{
+    if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime;
+    const o=AC.createOscillator(),g=AC.createGain(),fl=AC.createBiquadFilter();
+    o.type=type||'sine'; o.frequency.value=f;
+    fl.type='lowpass'; fl.frequency.value=1400;
+    o.connect(fl); fl.connect(g); g.connect(AC.destination);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol,t+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.start(t); o.stop(t+dur);
+  }catch(e){}
+}
+const SND={
+  tap(){tone(880,.16,.045);},
+  drop(){tone(rnd(620,760),.30,.055);},
+  ok(){tone(523.3,.5,.05);setTimeout(()=>tone(659.3,.6,.04),90);},
+  seal(){tone(392,.9,.055);setTimeout(()=>tone(261.6,1.2,.045),140);}
+};
+
+/* ═══ 屏切换 ═══ */
+function go(id){
+  $$('.scr').forEach(s=>s.classList.remove('on'));
+  if(id)$(id).classList.add('on');
+}
+function fade(fn){
+  $('#veil').classList.add('on');
+  setTimeout(()=>{fn();$('#veil').classList.remove('on');},820);
+}
+function toast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2200);
+}
 
 /* 时辰 */
 (function(){
   const nm=['子 23-1','丑 1-3','寅 3-5','卯 5-7','辰 7-9','巳 9-11','午 11-13',
     '未 13-15','申 15-17','酉 17-19','戌 19-21','亥 21-23'];
   const hr=[0,2,4,6,8,10,12,14,16,18,20,22];
-  $('#bh').innerHTML=nm.map((n,i)=>`<option value="${hr[i]}"${i===6?' selected':''}>${n}时</option>`).join('');
+  $('#f-h').innerHTML=nm.map((n,i)=>`<option value="${hr[i]}"${i===6?' selected':''}>${n}时</option>`).join('');
 })();
 
-/* ── Web Audio 古琴 + 滴水 ── */
-let AC=null;
-function ensureAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
-function dropSound(){
-  ensureAC(); const t=AC.currentTime;
-  const osc=AC.createOscillator(); const g=AC.createGain();
-  const filt=AC.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=900;
-  osc.connect(filt);filt.connect(g);g.connect(AC.destination);
-  osc.frequency.setValueAtTime(820,t); osc.frequency.exponentialRampToValueAtTime(380,t+.18);
-  g.gain.setValueAtTime(.22,t); g.gain.exponentialRampToValueAtTime(.0001,t+.38);
-  osc.start(t); osc.stop(t+.38);
+/* ═══ 流程 ═══ */
+$('#b-gate').onclick=()=>{
+  SND.tap();
+  if(S.natal){
+    const t=todayKey();
+    const done=S.days.find(d=>d.date===t);
+    if(done){ renderAlmanac(); fade(()=>go('#s-almanac')); toast('今日已入园，明日再来'); return; }
+    startAsk();
+  }else{
+    go('#s-natal');
+  }
+};
+
+$('#b-natal').onclick=()=>{
+  const y=+$('#f-y').value,m=+$('#f-m').value,d=+$('#f-d').value,h=+$('#f-h').value;
+  if(!(y>=1901&&y<=2026)||!(m>=1&&m<=12)||!(d>=1&&d<=31)){toast('生辰不合，请再看一眼');return;}
+  S.natal=natal(y,m,d,h); DB.save(S); SND.ok();
+  const nt=S.natal;
+  toast(`${nt.pillars.join(' ')}　${nt.strong}盛而${nt.weak}薄`);
+  setTimeout(startAsk,900);
+};
+
+function startAsk(){
+  ST.askIdx=0; ST.pad={P:0,A:0,D:0};
+  setBg('calm'); FX.set('dust');
+  fade(()=>{go('#s-ask'); renderAsk();});
 }
-function guqinNote(freq,dur,vol){
-  ensureAC(); const t=AC.currentTime;
-  const osc=AC.createOscillator(); const g=AC.createGain();
-  osc.type='sawtooth'; osc.frequency.value=freq;
-  // 泛音叠加
-  const osc2=AC.createOscillator(); const g2=AC.createGain();
-  osc2.type='sine'; osc2.frequency.value=freq*2; g2.gain.value=.18;
-  const filt=AC.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=1200;
-  osc.connect(filt);osc2.connect(g2);g2.connect(filt);filt.connect(g);g.connect(AC.destination);
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.04);
-  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-  osc.start(t);osc2.start(t);osc.stop(t+dur);osc2.stop(t+dur);
-}
-const SCALES=[196,220,261.6,293.7,329.6,392,440,523.3]; // 五声音阶扩展
-function playChord(){
-  const fs=[SCALES[0],SCALES[2],SCALES[4]];
-  fs.forEach((f,i)=>setTimeout(()=>guqinNote(f,1.8+i*.4,.08),i*80));
-}
-function playMelody(){
-  const seq=[4,2,0,2,4,4,4,2,2,2,4,6,6];
-  seq.forEach((n,i)=>setTimeout(()=>guqinNote(SCALES[n],.9,.07),i*260+200));
-}
-
-/* ════════════════════════════════════════
-   WebGL 三维心园（苏州五色 · 独立场景）
-════════════════════════════════════════ */
-const W={};
-function initGL(){
-  const r=new THREE.WebGLRenderer({canvas:$('#gl'),antialias:true,alpha:false});
-  r.setPixelRatio(Math.min(devicePixelRatio,2));
-  r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
-  r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.22;
-  r.outputColorSpace=THREE.SRGBColorSpace;
-  const sc=new THREE.Scene();
-  sc.background=new THREE.Color(0xf0ebe0);
-  sc.fog=new THREE.FogExp2(0xe8e2d4,0.022);
-  const cam=new THREE.PerspectiveCamera(42,1,.1,220);
-  cam.position.set(0,2,10.6);
-
-  // 光
-  const hemi=new THREE.HemisphereLight(0xf5f0e4,0xb0a898,1.1); sc.add(hemi);
-  const sun=new THREE.DirectionalLight(0xfff3d8,2.2);
-  sun.position.set(-7,9,5.4); sun.castShadow=true;
-  sun.shadow.mapSize.set(1536,1536);
-  const sh=sun.shadow.camera; sh.left=-12;sh.right=12;sh.top=12;sh.bottom=-12;sh.near=.5;sh.far=44;
-  sun.shadow.bias=-.0012; sun.shadow.radius=3.4; sc.add(sun);
-  const rim=new THREE.DirectionalLight(0xd4e4ec,.48); rim.position.set(6,4,-5); sc.add(rim);
-  const fill=new THREE.PointLight(0xffe4b8,.7,26); fill.position.set(2.4,2.2,4.2); sc.add(fill);
-
-  // 材质
-  const jadeWall=new THREE.MeshPhysicalMaterial({color:0xfcf8ee,roughness:.56,metalness:0,
-    clearcoat:.36,clearcoatRoughness:.5,sheen:.82,sheenColor:new THREE.Color(0xfff8e8)});
-  const jadeTile=new THREE.MeshPhysicalMaterial({color:0x565f67,roughness:.38,metalness:.1,clearcoat:.55});
-  const jadeSand=new THREE.MeshStandardMaterial({color:0xeae3d4,roughness:.96});
-  const mkJadeStone=()=>new THREE.MeshPhysicalMaterial({color:0xb0ccbc,roughness:.3,metalness:0,
-    transmission:.54,thickness:1.5,ior:1.62,clearcoat:.5,clearcoatRoughness:.26,
-    attenuationColor:new THREE.Color(0x4e7c64),attenuationDistance:2.2});
-  const jadeStone=mkJadeStone();
-
-  // 地面
-  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(80,80),jadeSand);
-  gnd.rotation.x=-Math.PI/2; gnd.receiveShadow=true; sc.add(gnd);
-
-  // 背墙 + 月洞门
-  const shp=new THREE.Shape();
-  shp.moveTo(-7,0);shp.lineTo(7,0);shp.lineTo(7,5.4);shp.lineTo(-7,5.4);shp.lineTo(-7,0);
-  const hl=new THREE.Path(); hl.absarc(0,2.35,1.48,0,6.2832,true); shp.holes.push(hl);
-  const wall=new THREE.Mesh(new THREE.ExtrudeGeometry(shp,{depth:.34,bevelEnabled:true,bevelSize:.05,bevelThickness:.05,bevelSegments:2}),jadeWall);
-  wall.position.set(0,0,-4.6); wall.receiveShadow=true; wall.castShadow=true; sc.add(wall);
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.5,.075,10,64),jadeTile);
-  ring.position.set(0,2.35,-4.42); sc.add(ring);
-  const eave=new THREE.Mesh(new THREE.BoxGeometry(14.8,.3,1.1),jadeTile);
-  eave.position.set(0,5.55,-4.44); eave.castShadow=true; sc.add(eave);
-  [-1,1].forEach(s=>{
-    const w2=new THREE.Mesh(new THREE.BoxGeometry(.32,4.5,7.4),jadeWall);
-    w2.position.set(s*7,2.25,-1); w2.receiveShadow=true; w2.castShadow=true; sc.add(w2);
-    const e2=new THREE.Mesh(new THREE.BoxGeometry(.92,.26,7.6),jadeTile);
-    e2.position.set(s*7,4.6,-1); e2.castShadow=true; sc.add(e2);
-  });
-  // 漏窗花格（左侧墙面）
-  const latticeGeo=new THREE.PlaneGeometry(1.4,1.4,6,6);
-  const latticeMat=new THREE.MeshStandardMaterial({color:0xd4cfc4,roughness:.7,wireframe:true});
-  const lattice=new THREE.Mesh(latticeGeo,latticeMat);
-  lattice.position.set(-5.5,2.6,-1); lattice.rotation.y=Math.PI/2; sc.add(lattice);
-
-  // 廊桥
-  const bridgeMat=new THREE.MeshPhysicalMaterial({color:0xd6cfc0,roughness:.72,metalness:.02});
-  const bridge=new THREE.Group();
-  const deck=new THREE.Mesh(new THREE.BoxGeometry(3,.15,1.1),bridgeMat);
-  deck.position.y=.46; deck.receiveShadow=true; deck.castShadow=true; bridge.add(deck);
-  for(let i=0;i<4;i++){
-    const p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,.5,8),bridgeMat);
-    p.position.set(-1.1+i*.74,0.2,(i%2===0?.44:-.44));
-    p.castShadow=true; bridge.add(p);
-  }
-  const rail=new THREE.Mesh(new THREE.BoxGeometry(3,.06,.06),bridgeMat);
-  rail.position.set(0,.7,.44); bridge.add(rail);
-  const rail2=rail.clone(); rail2.position.z=-.44; bridge.add(rail2);
-  bridge.position.set(3.4,0,2.1); bridge.rotation.y=-.24; sc.add(bridge);
-
-  // 水榭
-  const pavMat=new THREE.MeshPhysicalMaterial({color:0xf6f2e8,roughness:.58,clearcoat:.28});
-  const pav=new THREE.Group();
-  const base=new THREE.Mesh(new THREE.BoxGeometry(2.2,.12,1.8),bridgeMat);
-  base.position.y=.06; base.receiveShadow=true; pav.add(base);
-  const roof=new THREE.Mesh(new THREE.ConeGeometry(1.6,1.0,4),jadeTile);
-  roof.position.y=1.7; roof.rotation.y=Math.PI/4; roof.castShadow=true; pav.add(roof);
-  for(let i=0;i<4;i++){
-    const col=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,1.4,8),pavMat);
-    col.position.set(Math.cos(i*Math.PI/2+Math.PI/4)*.78,0.8,Math.sin(i*Math.PI/2+Math.PI/4)*.72);
-    col.castShadow=true; pav.add(col);
-  }
-  pav.position.set(-4.2,.045,2.6); sc.add(pav);
-
-  // 远山
-  for(let i=0;i<3;i++){
-    const m=new THREE.Mesh(new THREE.ConeGeometry(4.4-i*.7,2.6-i*.4,5),
-      new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(.54,.12,.58-i*.05),transparent:true,opacity:.58-i*.14,fog:false}));
-    m.position.set(-2.6+i*2.7,1.1,-13-i*1.6); sc.add(m);
-  }
-
-  // 水面（带自定义shader）
-  const wuni={uTime:{value:0},uMurk:{value:.3},uWarm:{value:.3},
-    uDeep:{value:new THREE.Color(0x547888)},uShallow:{value:new THREE.Color(0xa4c8d4)},
-    uRip:{value:Array.from({length:10},()=>new THREE.Vector3())}};
-  const wmat=new THREE.ShaderMaterial({uniforms:wuni,transparent:true,side:THREE.DoubleSide,
-    vertexShader:`uniform float uTime;uniform vec3 uRip[10];varying vec2 vUv;varying float vW;varying vec3 vP;
-     void main(){vUv=uv;vec3 p=position;
-      float w=sin(p.x*2.1+uTime*.75)*.019+sin(p.y*2.7-uTime*.58)*.017+sin((p.x+p.y)*3.3+uTime*.4)*.009;
-      for(int i=0;i<10;i++){vec3 r=uRip[i];if(r.z>.002){float d=distance(p.xy,r.xy);
-       w+=sin(d*13.-uTime*5.2)*exp(-d*2.6)*r.z*.15;}}
-      p.z+=w;vW=w;vP=p;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
-    fragmentShader:`uniform float uTime,uMurk,uWarm;uniform vec3 uDeep,uShallow;varying vec2 vUv;varying float vW;varying vec3 vP;
-     void main(){float e=smoothstep(0.,.3,min(min(vUv.x,1.-vUv.x),min(vUv.y,1.-vUv.y)));
-      vec3 c=mix(uShallow,uDeep,smoothstep(-.028,.048,vW));
-      float ca=sin(vP.x*8.5+uTime*.9)*sin(vP.y*10.5-uTime*.7);
-      c+=vec3(.16,.2,.18)*smoothstep(.56,1.,ca);
-      c+=vec3(.22,.15,.05)*uWarm*smoothstep(.3,1.,vW*9.+.5);
-      c=mix(c,vec3(.50,.52,.48),uMurk*.60);
-      gl_FragColor=vec4(c,mix(.48,.92,e));}`});
-  const water=new THREE.Mesh(new THREE.PlaneGeometry(6.6,4.4,110,80),wmat);
-  water.rotation.x=-Math.PI/2; water.position.set(0,.045,.9); sc.add(water);
-  const kerb=new THREE.Mesh(new THREE.BoxGeometry(7,.17,4.8),new THREE.MeshStandardMaterial({color:0xd2cabb,roughness:.9}));
-  kerb.position.set(0,.02,.9); kerb.receiveShadow=true; sc.add(kerb);
-
-  // 荷叶
-  const lotusGroup=new THREE.Group();
-  function lotus(x,z,s,rot){
-    const lg=new THREE.Mesh(new THREE.CircleGeometry(s*.9,12),
-      new THREE.MeshStandardMaterial({color:0x7a9e6e,roughness:.8,side:THREE.DoubleSide}));
-    lg.rotation.x=-Math.PI/2; lg.position.set(x,.06,z); lg.rotation.z=rot;
-    lg.castShadow=false; lotusGroup.add(lg);
-  }
-  [[.4,.5,.36,0],[-.6,1.1,.28,.8],[1.2,.2,.32,-.4],[-.2,-.4,.24,1.2],[1.8,.8,.20,2.1]].forEach(p=>lotus(...p));
-  sc.add(lotusGroup);
-
-  // 太湖石
-  function stone(sx,sy,sz,seed){
-    const gg=new THREE.IcosahedronGeometry(1,4);
-    const pos=gg.attributes.position;
-    for(let i=0;i<pos.count;i++){
-      const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
-      const n=Math.sin(x*3.1+seed)*Math.cos(y*2.7-seed)*Math.sin(z*3.6+seed*1.7);
-      pos.setXYZ(i,x*(1+n*.30),y*(1+n*.30),z*(1+n*.30));
-    }
-    gg.computeVertexNormals();
-    const m=new THREE.Mesh(gg,jadeStone); m.scale.set(sx,sy,sz);
-    m.castShadow=true; m.receiveShadow=true; return m;
-  }
-  const peak=new THREE.Group();
-  const pa=stone(1.05,1.35,.95,1.2); pa.position.y=1.15; peak.add(pa);
-  const pb=stone(.74,.92,.7,3.4); pb.position.set(.16,2.34,-.05); pb.rotation.z=.4; peak.add(pb);
-  const pc=stone(.5,.58,.48,5.9); pc.position.set(-.22,3.06,.08); peak.add(pc);
-  peak.position.set(-3.55,0,1.2); sc.add(peak);
-
-  // 竹
-  const bmat=new THREE.MeshStandardMaterial({color:0x7a9668,roughness:.66});
-  const lmat=new THREE.MeshStandardMaterial({color:0x6a8c58,roughness:.72,side:THREE.DoubleSide,transparent:true,opacity:.96});
-  const bams=[];
-  function bamboo(x,z,h,rot){
-    const G=new THREE.Group();
-    const st=new THREE.Mesh(new THREE.CylinderGeometry(.045,.062,h,7),bmat);
-    st.position.y=h/2; st.castShadow=true; G.add(st);
-    for(let i=0;i<7;i++){const ly=h*(.42+.082*i);
-      for(let j=0;j<3;j++){
-        const lf=new THREE.Mesh(new THREE.PlaneGeometry(.8,.115),lmat);
-        const ang=i*1.9+j*2.2;
-        lf.position.set(Math.cos(ang)*.4,ly,Math.sin(ang)*.4);
-        lf.rotation.set(-.3+Math.sin(ang)*.3,ang,.22*(j-1)); lf.castShadow=true; G.add(lf);
-      }}
-    G.position.set(x,0,z); G.rotation.z=rot;
-    G.userData={ph:rnd(0,6.28),base:rot,h,alive:true}; bams.push(G); sc.add(G);
-  }
-  [[-6,-2.4,4.6,.05],[-5.4,-1.2,5.3,-.04],[-6.3,-.2,4.2,.08],[-4.9,-2.9,4.9,-.02],
-   [5.9,-2.6,4.8,-.05],[5.3,-1.4,5.4,.04],[6.2,-.4,4.3,-.08],[4.8,-3,4.4,.03],
-   [-2,-4,3.9,.04],[2.2,-4.1,4.1,-.03]].forEach(p=>bamboo(...p));
-
-  // 寒梅 (寻芳场景专用)
-  const plumGroup=new THREE.Group(); plumGroup.visible=false;
-  const branchMat=new THREE.MeshStandardMaterial({color:0x6e5844,roughness:.88});
-  function plumBranch(x0,y0,z0,dx,dy,dz,lv){
-    if(lv>3)return;
-    const len=.9-lv*.2, geo=new THREE.CylinderGeometry(.025-.006*lv,.035-.006*lv,len,6);
-    const m=new THREE.Mesh(geo,branchMat); m.castShadow=true;
-    m.position.set(x0+dx*len/2,y0+dy*len/2,z0+dz*len/2);
-    m.rotation.set(Math.atan2(dz,dy),0,Math.atan2(dx,dy)); plumGroup.add(m);
-    if(lv<3){
-      plumBranch(x0+dx*len,y0+dy*len,z0+dz*len,dx+rnd(-.4,.4),dy+rnd(-.1,.3),dz+rnd(-.3,.3),lv+1);
-      plumBranch(x0+dx*len,y0+dy*len,z0+dz*len,dx+rnd(-.4,.4),dy+rnd(-.1,.3),dz+rnd(-.3,.3),lv+1);
-    }
-  }
-  plumBranch(-4.5,0,-1,0,1,0,0);
-  // 花苞
-  const petalMat=new THREE.MeshStandardMaterial({color:0xfce8f0,roughness:.6,side:THREE.DoubleSide,transparent:true,opacity:.95});
-  for(let i=0;i<22;i++){
-    const bx=-4.5+rnd(-.8,.8),by=rnd(.8,3.2),bz=-1+rnd(-.4,.4);
-    const pg=new THREE.Group();
-    for(let j=0;j<5;j++){
-      const petal=new THREE.Mesh(new THREE.CircleGeometry(.15,8),petalMat);
-      petal.rotation.set(rnd(-.3,.3),j/5*6.28,rnd(-.2,.2));
-      pg.add(petal);
-    }
-    pg.position.set(bx,by,bz); pg.userData.phase=rnd(0,6.28); plumGroup.add(pg);
-  }
-  // 露珠
-  const dewMat=new THREE.MeshPhysicalMaterial({color:0xe8f4ff,roughness:0,metalness:.1,
-    transmission:.88,thickness:.5,ior:1.44});
-  const dewDrops=[];
-  for(let i=0;i<8;i++){
-    const d=new THREE.Mesh(new THREE.SphereGeometry(.06,12,10),dewMat);
-    d.position.set(-4.5+rnd(-.6,.6),rnd(.6,2.8),-1+rnd(-.4,.4));
-    d.userData={base:d.position.y,phase:rnd(0,6.28),caught:false}; dewDrops.push(d); plumGroup.add(d);
-  }
-  plumGroup.position.set(0,0,0); sc.add(plumGroup);
-
-  /* ── 焦虑：漏窗囚澜 · 冰裂漏窗 + 墙上狂乱树影 ── */
-  const anxGroup=new THREE.Group(); anxGroup.visible=false;
-  const iceFrame=new THREE.Mesh(new THREE.BoxGeometry(2.2,2.2,.1),
-    new THREE.MeshPhysicalMaterial({color:0xc8dce4,roughness:.22,metalness:0,
-      transmission:.6,thickness:.4,ior:1.5,clearcoat:.5}));
-  iceFrame.position.set(-3.1,2.7,-4.32); anxGroup.add(iceFrame);
-  const iceLineMat=new THREE.LineBasicMaterial({color:0x7e98a6,transparent:true,opacity:.78});
-  for(let i=0;i<16;i++){
-    const pts=[]; const a0=rnd(0,6.28), r0=rnd(.15,1.02);
-    pts.push(new THREE.Vector3(Math.cos(a0)*r0,Math.sin(a0)*r0,0));
-    for(let j=0;j<3;j++){
-      const a1=a0+rnd(-1.1,1.1), r1=clamp(r0+rnd(-.45,.45),.08,1.02);
-      pts.push(new THREE.Vector3(Math.cos(a1)*r1,Math.sin(a1)*r1,0));
-    }
-    const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),iceLineMat);
-    ln.position.set(-3.1,2.7,-4.25); anxGroup.add(ln);
-  }
-  const shadowMat=new THREE.MeshBasicMaterial({color:0x33404a,transparent:true,opacity:.26,side:THREE.DoubleSide});
-  const wildShadows=[];
-  for(let i=0;i<9;i++){
-    const sg=new THREE.Mesh(new THREE.PlaneGeometry(rnd(.5,1.5),rnd(1.5,3.2)),shadowMat);
-    sg.position.set(rnd(-5.4,5.4),rnd(1.5,4.1),-4.27);
-    sg.userData={ph:rnd(0,6.28),amp:rnd(.2,.5),bx:sg.position.x};
-    wildShadows.push(sg); anxGroup.add(sg);
-  }
-  sc.add(anxGroup);
-
-  /* ── 悲伤：枕流听雨 · 雨丝 ── */
-  const rainGroup=new THREE.Group(); rainGroup.visible=false;
-  const RN=440, rainPos=new Float32Array(RN*3), rainVel=new Float32Array(RN);
-  for(let i=0;i<RN;i++){
-    rainPos[i*3]=rnd(-8,8); rainPos[i*3+1]=rnd(0,11); rainPos[i*3+2]=rnd(-5,6);
-    rainVel[i]=rnd(.10,.21);
-  }
-  const rainGeo=new THREE.BufferGeometry();
-  rainGeo.setAttribute('position',new THREE.BufferAttribute(rainPos,3));
-  const rain=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xc0ccd8,size:.06,
-    transparent:true,opacity:.5,depthWrite:false,sizeAttenuation:true}));
-  rainGroup.add(rain); sc.add(rainGroup);
-
-  /* ── 喜悦：承晖摇影 · 墙上金斑 ── */
-  const joyGroup=new THREE.Group(); joyGroup.visible=false;
-  const glowMat=new THREE.MeshBasicMaterial({color:0xffe6a8,transparent:true,opacity:.40,
-    blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false});
-  const goldSpots=[];
-  for(let i=0;i<12;i++){
-    const gs=new THREE.Mesh(new THREE.CircleGeometry(rnd(.2,.5),16),glowMat);
-    gs.position.set(rnd(-5.5,5.5),rnd(1.6,4.5),-4.23);
-    gs.userData={ph:rnd(0,6.28),bx:gs.position.x,by:gs.position.y};
-    goldSpots.push(gs); joyGroup.add(gs);
-  }
-  sc.add(joyGroup);
-
-  /* ── 宁静：寄畅绝尘 · 枯山水白沙纹 ── */
-  const calmGroup=new THREE.Group(); calmGroup.visible=false;
-  const sandLineMat=new THREE.LineBasicMaterial({color:0xcfc6b2,transparent:true,opacity:.6});
-  for(let i=0;i<10;i++){
-    const pts=[];
-    for(let t2=0;t2<=44;t2++){
-      const px=-5.6+t2*.26;
-      pts.push(new THREE.Vector3(px,.06,-2.8+i*.30+Math.sin(t2*.3+i*.72)*.15));
-    }
-    calmGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),sandLineMat));
-  }
-  sc.add(calmGroup);
-
-  /* ── 笃定：立峰骨挺 · 散石待叠 ── */
-  const firmGroup=new THREE.Group(); firmGroup.visible=false;
-  const looseStones=[];
-  const STONE_SLOTS=[[2.6,.44,2.4],[2.6,1.04,2.4],[2.6,1.52,2.4],[2.6,1.90,2.4]];
-  [[-1.6,.32,3.8],[1.2,.28,4.1],[-.4,.24,4.4],[2.2,.30,3.4]].forEach((p,i)=>{
-    const st=stone(.44-i*.045,.38-i*.035,.42-i*.04,i*2.7+1.1);
-    st.position.set(p[0],p[1],p[2]);
-    st.userData={slot:i,placed:false,home:[p[0],p[1],p[2]]};
-    looseStones.push(st); firmGroup.add(st);
-  });
-  sc.add(firmGroup);
-
-  /* ── 迷茫：月洞拨云 · 门内微光 ── */
-  const lostGroup=new THREE.Group(); lostGroup.visible=false;
-  const doorGlow=new THREE.Mesh(new THREE.CircleGeometry(1.42,40),
-    new THREE.MeshBasicMaterial({color:0xfff2d4,transparent:true,opacity:.30,
-      blending:THREE.AdditiveBlending,depthWrite:false}));
-  doorGlow.position.set(0,2.35,-4.5); lostGroup.add(doorGlow);
-  lostGroup.userData={glow:doorGlow};
-  sc.add(lostGroup);
-
-  // 丁达尔光
-  const rayMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,
-    blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
-    uniforms:{uTime:{value:0},uInt:{value:.28},uCol:{value:new THREE.Color(0xfff2d0)}},
-    vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`uniform float uTime,uInt;uniform vec3 uCol;varying vec2 vUv;
-     void main(){float a=smoothstep(0.,.34,vUv.x)*smoothstep(0.,.34,1.-vUv.x);
-      float d=pow(1.-vUv.y,1.5);float f=.8+.2*sin(uTime*.7+vUv.y*4.);
-      gl_FragColor=vec4(uCol,a*d*uInt*f);}`});
-  for(let i=0;i<7;i++){
-    const p=new THREE.Mesh(new THREE.PlaneGeometry(1.5,11),rayMat);
-    p.position.set(-5.2+i*1.75,4.4,-2.2+i*.3); p.rotation.set(-.3,.16,.3); sc.add(p);
-  }
-
-  // 粒子
-  const N=280,pa2=new Float32Array(N*3),sp=new Float32Array(N);
-  for(let i=0;i<N;i++){pa2[i*3]=rnd(-7,7);pa2[i*3+1]=rnd(0,6.5);pa2[i*3+2]=rnd(-6,6);sp[i]=rnd(.1,.32);}
-  const dg=new THREE.BufferGeometry(); dg.setAttribute('position',new THREE.BufferAttribute(pa2,3));
-  const dust=new THREE.Points(dg,new THREE.PointsMaterial({color:0xffeec4,size:.05,transparent:true,
-    opacity:.48,depthWrite:false,blending:THREE.AdditiveBlending,sizeAttenuation:true}));
-  sc.add(dust);
-
-  Object.assign(W,{r,sc,cam,sun,hemi,rim,fill,water,wuni,rayMat,peak,bams,dust,pa:pa2,sp,
-    jadeStone,jadeWall,ring,plumGroup,dewDrops,lotusGroup,
-    anxGroup,wildShadows,rainGroup,rain,rainPos,rainVel,RN,
-    joyGroup,goldSpots,calmGroup,firmGroup,looseStones,STONE_SLOTS,lostGroup,doorGlow});
-  let ri=0; W.ripple=(x,z,s)=>{W.wuni.uRip.value[ri++%10].set(x,z,s);};
-  W.setScene=setScene;
-  resize(); addEventListener('resize',resize); animate();
-}
-
-/* 八相独立场景切换 */
-function setScene(key){
-  if(!W.plumGroup)return;
-  W.plumGroup.visible =(key==='hope');
-  W.anxGroup.visible  =(key==='anx');
-  W.rainGroup.visible =(key==='sad');
-  W.joyGroup.visible  =(key==='joy');
-  W.calmGroup.visible =(key==='calm');
-  W.firmGroup.visible =(key==='firm');
-  W.lostGroup.visible =(key==='lost');
-  // 竹林：扫竹相竹子更密更高，宁静相稀疏
-  W.bams.forEach((g,i)=>{
-    g.userData.alive=true; g.rotation.z=g.userData.base; g.position.y=0; g.visible=true;
-    if(key==='calm'&&i%2===0) g.visible=false;
-    if(key==='ang') g.scale.setScalar(1.14);
-  });
-  // 荷叶仅在悲伤/宁静显现
-  W.lotusGroup.visible=(key==='sad'||key==='calm'||key==='hope');
-  // 散石复位
-  W.looseStones.forEach(st=>{
-    st.userData.placed=false;
-    st.position.set(...st.userData.home);
-  });
-  W.dewDrops.forEach(d=>{d.userData.caught=false;d.visible=true;});
-}
-
-// 扫竹——真实吹折交互
-function breakBamboo(idx){
-  if(idx>=W.bams.length)return;
-  const g=W.bams[idx];
-  if(!g.userData.alive)return;
-  g.userData.alive=false;
-  const dir=Math.sign(g.userData.base+.01); let prog=0;
-  const fall=setInterval(()=>{
-    prog+=.022; g.rotation.z=g.userData.base+dir*prog*1.2;
-    g.position.y=-prog*0.9;
-    if(prog>=1){ clearInterval(fall);
-      // 竹叶散落粒子
-      for(let i=0;i<12;i++){
-        const idx2=Math.floor(rnd(0,W.pa.length/3));
-        W.pa[idx2*3]=g.position.x+rnd(-.8,.8);
-        W.pa[idx2*3+1]=rnd(.5,2.8);
-        W.pa[idx2*3+2]=g.position.z+rnd(-.5,.5);
-      }
-      W.dust.geometry.attributes.position.needsUpdate=true;
-      dropSound(); playChord();
-    }
-  },18);
-}
-
-function tint(x,deg){
-  const k=.6+deg*.16;
-  const sky=new THREE.Color(x.sky[0],x.sky[1],x.sky[2]);
-  const paper=new THREE.Color(0xf0ebe0);
-  const bg=paper.clone().lerp(sky,.3*k);
-  W.sc.background.copy(bg); W.sc.fog.color.copy(bg);
-  W.sc.fog.density=.014+x.fog*.018*k;
-  W.hemi.color.copy(paper.clone().lerp(sky,.52));
-  W.hemi.intensity=1.1-x.fog*.14;
-  W.sun.color.setRGB(lerp(.92,1,x.warm),lerp(.94,.96,x.warm),lerp(1,.82,x.warm));
-  W.sun.intensity=1.6+x.warm*1.2;
-  W.rim.color.copy(sky);
-  W.fill.color.set(x.hue); W.fill.intensity=(.38+x.warm*.76)*k;
-  W.wuni.uDeep.value.setRGB(x.water[0]*.74,x.water[1]*.74,x.water[2]*.74);
-  W.wuni.uShallow.value.setRGB(clamp(x.water[0]*1.6,0,1),clamp(x.water[1]*1.6,0,1),clamp(x.water[2]*1.6,0,1));
-  W.wuni.uMurk.value=x.murk*k; W.wuni.uWarm.value=x.warm;
-  W.jadeStone.color.setRGB(x.stone[0],x.stone[1],x.stone[2]);
-  W.jadeStone.attenuationColor.setRGB(x.stone[0]*.44,x.stone[1]*.54,x.stone[2]*.48);
-  W.jadeWall.sheenColor.set(x.hue);
-  W.rayMat.uniforms.uCol.value.set(x.hue).lerp(new THREE.Color(0xfff6e0),.6);
-  W.rayMat.uniforms.uInt.value=.12+x.warm*.28;
-  if(S.bazi){
-    const bz=S.bazi;
-    W.wuni.uMurk.value=clamp(W.wuni.uMurk.value+(bz.weak==='水'?.24:0),0,1);
-    const bScale=bz.weak==='木'?.68:(bz.strong==='木'?1.1:1);
-    W.bams.forEach(g=>{if(g.userData.alive)g.scale.setScalar(bScale);});
-  }
-  W.setScene(x.k);
-}
-
-let mx=0,my=0;
-$('#frame').addEventListener('pointermove',e=>{
-  const r=$('#frame').getBoundingClientRect();
-  mx=((e.clientX-r.left)/r.width-.5)*2; my=((e.clientY-r.top)/r.height-.5)*2;
-});
-
-function resize(){
-  const fr=$('#frame'),w=fr.clientWidth,h=fr.clientHeight;
-  W.r.setSize(w,h,false); W.cam.aspect=w/h; W.cam.updateProjectionMatrix();
-  const fc=$('#fogc'); fc.width=w*devicePixelRatio; fc.height=h*devicePixelRatio;
-  if(FOG.painted)FOG.repaint();
-}
-
-function animate(){
-  requestAnimationFrame(animate);
-  const t=performance.now()/1000;
-  W.wuni.uTime.value=t; W.rayMat.uniforms.uTime.value=t;
-  W.wuni.uRip.value.forEach(v=>{if(v.z>0)v.z=Math.max(0,v.z-.0075);});
-  W.bams.forEach((g,i)=>{
-    if(g.userData.alive) g.rotation.z=g.userData.base+Math.sin(t*.62+g.userData.ph)*.055+Math.sin(t*1.5+i)*.016;
-  });
-  // 露珠晃动
-  if(W.dewDrops){
-    W.dewDrops.forEach(d=>{
-      if(!d.userData.caught)
-        d.position.y=d.userData.base+Math.sin(t*1.4+d.userData.phase)*.04;
-    });
-  }
-  // 焦虑：墙上狂乱树影剧烈摆动
-  if(W.anxGroup&&W.anxGroup.visible){
-    W.wildShadows.forEach(s=>{
-      const u=s.userData;
-      s.position.x=u.bx+Math.sin(t*2.1+u.ph)*u.amp+Math.sin(t*5.3+u.ph*2)*u.amp*.34;
-      s.rotation.z=Math.sin(t*1.7+u.ph)*.20;
-      s.material.opacity=.20+.12*Math.abs(Math.sin(t*1.3+u.ph));
-    });
-  }
-  // 悲伤：雨丝下落 + 落水自生涟漪
-  if(W.rainGroup&&W.rainGroup.visible){
-    for(let i=0;i<W.RN;i++){
-      W.rainPos[i*3+1]-=W.rainVel[i];
-      if(W.rainPos[i*3+1]<0){
-        const rx=W.rainPos[i*3], rz=W.rainPos[i*3+2];
-        if(Math.abs(rx)<3.2&&Math.abs(rz-0.9)<2.1&&Math.random()<.16)
-          W.ripple(rx,rz-0.9,.42);
-        W.rainPos[i*3]=rnd(-8,8); W.rainPos[i*3+1]=rnd(9,11.5); W.rainPos[i*3+2]=rnd(-5,6);
-      }
-    }
-    W.rain.geometry.attributes.position.needsUpdate=true;
-  }
-  // 喜悦：金斑游移呼吸
-  if(W.joyGroup&&W.joyGroup.visible){
-    W.goldSpots.forEach(g=>{
-      const u=g.userData;
-      g.position.x=u.bx+Math.sin(t*.52+u.ph)*.34;
-      g.position.y=u.by+Math.cos(t*.42+u.ph)*.20;
-      g.material.opacity=.26+.22*Math.abs(Math.sin(t*.8+u.ph));
-      const s2=1+Math.sin(t*.9+u.ph)*.16; g.scale.setScalar(s2);
-    });
-  }
-  // 迷茫：月洞门微光呼吸
-  if(W.lostGroup&&W.lostGroup.visible){
-    W.doorGlow.material.opacity=.20+.16*Math.sin(t*.68);
-    W.doorGlow.scale.setScalar(1+Math.sin(t*.5)*.05);
-  }
-  // 呼吸引导（宁静相）驱动水面
-  if(BREATH.active){
-    const ph=BREATH.phase(t);
-    W.wuni.uRip.value[0].set(0,0,ph*.5);
-  }
-  // 梅花轻颤
-  if(W.plumGroup&&W.plumGroup.visible){
-    W.plumGroup.children.forEach((c,i)=>{
-      if(c.userData&&c.userData.phase!==undefined)
-        c.rotation.z=Math.sin(t*.8+c.userData.phase)*.06;
-    });
-  }
-  for(let i=0;i<W.sp.length;i++){
-    W.pa[i*3+1]+=W.sp[i]*.0055; W.pa[i*3]+=Math.sin(t*.3+i)*.0015;
-    if(W.pa[i*3+1]>6.5)W.pa[i*3+1]=0;
-  }
-  W.dust.geometry.attributes.position.needsUpdate=true;
-  W.cam.position.set(lerp(W.cam.position.x,mx*.72,.045),
-    lerp(W.cam.position.y,2-my*.36+Math.sin(t*.34)*.05,.045),10.6+Math.sin(t*.22)*.16);
-  W.cam.lookAt(0,1.92,0);
-  W.r.render(W.sc,W.cam);
-}
-
-/* ════════════════ 呼吸引导（4-7-8） ════════════════ */
-const BREATH={active:false,t0:0,cycles:0,need:3,
-  phase(t){
-    const e=(t-this.t0)%19; // 4吸 + 7屏 + 8呼
-    if(e<4) return e/4;
-    if(e<11) return 1;
-    return 1-(e-11)/8;
-  },
-  label(t){
-    const e=(t-this.t0)%19;
-    if(e<4) return ['吸　气',Math.ceil(4-e)];
-    if(e<11) return ['屏　息',Math.ceil(11-e)];
-    return ['呼　气',Math.ceil(19-e)];
-  }};
-
-/* ════════════════ 雾层 ════════════════ */
-const FOG={painted:false};
-(function(){
-  const c=$('#fogc'),x=c.getContext('2d');
-  FOG.repaint=()=>{
-    const w=c.width,h=c.height;
-    x.globalCompositeOperation='source-over'; x.clearRect(0,0,w,h);
-    const g=x.createRadialGradient(w*.5,h*.42,w*.05,w*.5,h*.5,w*.95);
-    g.addColorStop(0,'rgba(248,244,236,.78)');g.addColorStop(.55,'rgba(236,230,218,.92)');
-    g.addColorStop(1,'rgba(222,214,200,.98)');
-    x.fillStyle=g;x.fillRect(0,0,w,h);
-    for(let i=0;i<60;i++){
-      const px=Math.random()*w,py=Math.random()*h,rr=(50+Math.random()*180)*devicePixelRatio;
-      const rg=x.createRadialGradient(px,py,0,px,py,rr);
-      rg.addColorStop(0,'rgba(255,255,255,.32)');rg.addColorStop(1,'rgba(255,255,255,0)');
-      x.fillStyle=rg;x.beginPath();x.arc(px,py,rr,0,6.29);x.fill();
-    }
-    FOG.painted=true;
-  };
-  FOG.hide=()=>{x.clearRect(0,0,c.width,c.height);FOG.painted=false;};
-  FOG.wipe=(cx,cy)=>{
-    const R=68*devicePixelRatio;
-    x.globalCompositeOperation='destination-out';
-    const g=x.createRadialGradient(cx,cy,0,cx,cy,R);
-    g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.55,'rgba(0,0,0,.72)');g.addColorStop(1,'rgba(0,0,0,0)');
-    x.fillStyle=g;x.beginPath();x.arc(cx,cy,R,0,6.29);x.fill();
-  };
-  FOG.ratio=()=>{
-    const w=c.width,h=c.height,st=18,d=x.getImageData(0,0,w,h).data;
-    let tot=0,clr=0;
-    for(let yy=0;yy<h;yy+=st)for(let xx=0;xx<w;xx+=st){tot++;if(d[(yy*w+xx)*4+3]<70)clr++;}
-    return clr/Math.max(1,tot);
-  };
-})();
-
-/* ════════════════ 泼墨池 ════════════════ */
-const INK={blobs:[],t:0};
-(function(){
-  const c=$('#inkc'),x=c.getContext('2d');
-  INK.fit=()=>{const r=c.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;};
-  INK.add=(hex,w0)=>{INK.blobs.push({x:c.width*(.28+Math.random()*.44),y:c.height*(.26+Math.random()*.44),
-    r:4*devicePixelRatio,max:(36+w0*15)*devicePixelRatio,c:hex,a:0});};
-  INK.clear=()=>{INK.blobs=[];};
-  INK.reweight=(w0)=>{INK.blobs.forEach((b,i)=>{b.max=(i===0?40+w0*14:32+w0*9)*devicePixelRatio;});};
-  (function loop(){
-    requestAnimationFrame(loop); INK.t+=.016;
-    const w=c.width,h=c.height;
-    x.globalCompositeOperation='source-over';
-    const bg=x.createRadialGradient(w*.4,h*.32,0,w*.5,h*.5,w*.62);
-    bg.addColorStop(0,'#faf6ec');bg.addColorStop(1,'#ede5d4');
-    x.fillStyle=bg;x.fillRect(0,0,w,h);
-    x.globalCompositeOperation='multiply';
-    INK.blobs.forEach((b,i)=>{
-      b.r=lerp(b.r,b.max,.02);b.a=lerp(b.a,.62,.03);
-      for(let k=0;k<5;k++){
-        const wob=Math.sin(INK.t*1.1+k*1.6+i)*b.r*.22;
-        const px=b.x+Math.cos(k*1.26+INK.t*.28+i)*b.r*.44+wob*.3;
-        const py=b.y+Math.sin(k*1.26+INK.t*.28+i)*b.r*.44+wob*.3;
-        const rr=b.r*(.64+.2*Math.sin(INK.t*.9+k+i));
-        const g2=x.createRadialGradient(px,py,0,px,py,rr);
-        g2.addColorStop(0,hexA(b.c,b.a*.54));g2.addColorStop(.6,hexA(b.c,b.a*.18));g2.addColorStop(1,hexA(b.c,0));
-        x.fillStyle=g2;x.beginPath();x.arc(px,py,rr,0,6.29);x.fill();
-      }});
-  })();
-})();
-function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
-
-/* ════════════════ 侧影 + 气泡 ════════════════ */
-function showSil(on){$('#silhouette').classList.toggle('on',on);}
-let sayTimer=null;
-function saySomething(txt,keep,pos){
-  const el=$('#say'), p=el.querySelector('p');
-  el.className='say '+(pos||'btm');
-  el.classList.add('on');
-  clearInterval(sayTimer);
-  const plain=txt.replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'');
-  p.textContent=''; let i=0;
-  sayTimer=setInterval(()=>{
-    i++; p.textContent=plain.slice(0,i);
-    if(i>=plain.length){clearInterval(sayTimer); p.innerHTML=txt;
-      if(!keep)setTimeout(()=>el.classList.remove('on'),3400);}
-  },46);
-}
-function hideSay(){$('#say').classList.remove('on');}
-
-/* ════════════════ PAD 问卷 ════════════════ */
-function renderQuiz(){
-  const qi=S.qIdx, q=QUIZ[qi];
-  $('#quiz').innerHTML=`<div class="q-item"><div class="q-text">${q.q}</div>
-    <div class="q-opts">${q.opts.map(o=>`<button class="q-opt" data-v="${o.v}">${o.l}</button>`).join('')}</div></div>`;
-  const dots=$('#qdots'); dots.innerHTML=QUIZ.map((_,i)=>`<div class="q-dot${i<=qi?' on':''}"></div>`).join('');
-  document.querySelectorAll('.q-opt').forEach(btn=>{
-    btn.onclick=()=>{
-      document.querySelectorAll('.q-opt').forEach(b=>b.classList.remove('sel'));
-      btn.classList.add('sel');
-      S.pad[q.dim]=+btn.dataset.v;
-      dropSound();
+function renderAsk(){
+  const i=ST.askIdx, a=ASKS[i];
+  $('#q-dots').innerHTML=ASKS.map((_,n)=>`<div class="qdot${n<=i?' on':''}"></div>`).join('');
+  $('#q-text').textContent=a.q;
+  $('#q-opts').innerHTML=a.opts.map(o=>
+    `<button class="qopt" data-v="${o.v}">${o.l}</button>`).join('');
+  $$('.qopt').forEach(b=>{
+    b.onclick=()=>{
+      $$('.qopt').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel'); SND.tap();
+      ST.pad[a.dim]=+b.dataset.v;
       setTimeout(()=>{
-        S.qIdx++;
-        if(S.qIdx>=QUIZ.length){
-          // 问卷结束 → 推荐心色 + 进泼墨
-          const rec=padToXiang(S.pad,S.bazi);
-          INK.fit(); INK.clear(); buildHues(rec.k); show('#s2');
-          showSil(true);
-          setTimeout(()=>saySomething(`你的情绪是<b>${rec.emo}</b>。试着选几个最吸引你的颜色——不用想太多，跟着感觉走。`,true,'mid'),340);
-        }else{
-          renderQuiz();
-        }
-      },320);
+        ST.askIdx++;
+        if(ST.askIdx>=ASKS.length) doReveal();
+        else renderAsk();
+      },340);
     };
   });
 }
 
-/* ════════════════ 泼墨选色 ════════════════ */
-function buildHues(preK){
-  const bz=S.bazi;
-  $('#hues').innerHTML=XIANG.map(x=>{
-    const tagWeak=(x.el===bz.weak||x.el===bz.weak2);
-    const pre=(x.k===preK)?'▲ ':'';
-    return `<div class="hue${x.k===preK?' sel':''}" data-k="${x.k}"
-      style="background:radial-gradient(circle at 32% 28%,${x.hue}f2,${x.hue}a4 55%,${x.hue}62)">
-      <u>${pre}${x.el}·${ZANG[x.el].zang}${tagWeak?' 弱':''}</u>
-      <span>${x.hn}</span></div>`;}).join('');
-  if(preK){S.picks=[preK]; INK.add(BY_K[preK].hue,S.deg);}
-  else S.picks=[];
-  $('#inkhint').textContent='';
-  $('#deg').classList.remove('on'); $('#b2').classList.add('dim');
-  document.querySelectorAll('.hue').forEach(el=>{
-    el.onclick=()=>{
-      const k=el.dataset.k,ix=S.picks.indexOf(k),x=BY_K[k];
-      if(ix>=0){S.picks.splice(ix,1);el.classList.remove('sel');
-        INK.clear();S.picks.forEach(kk=>INK.add(BY_K[kk].hue,S.deg));}
-      else{if(S.picks.length>=3)return;
-        S.picks.push(k);el.classList.add('sel');INK.add(x.hue,S.deg);}
-      if(S.picks.length){
-        const p0=BY_K[S.picks[0]];
-        $('#inkhint').innerHTML=`${p0.hn} 属${p0.el}·入${ZANG[p0.el].zang}·${p0.zhiTxt}`;
-        const mine=(p0.el===bz.weak||p0.el===bz.weak2);
-        saySomething(`${p0.hn}属${p0.el}，入${ZANG[p0.el].zang}，${p0.zhiTxt}。`+
-          (mine?`${ZANG[p0.el].zang}是你命中薄处——今日这份${p0.emo}格外沉。`
-               :(p0.el===bz.strong?`${ZANG[p0.el].zang}本是你命中旺处，过用则亢。`:'')),true,'mid');
-      }else $('#inkhint').textContent='';
-      $('#deg').classList.toggle('on',S.picks.length>=1);
-      $('#b2').classList.toggle('dim',S.picks.length<2);
-    };
-  });
-  $('#degr').oninput=e=>{S.deg=+e.target.value;$('#degv').textContent=DEGW[S.deg];INK.reweight(S.deg);};
-  S.deg=+$('#degr').value; $('#degv').textContent=DEGW[S.deg];
+function doReveal(){
+  ST.x=pickXiang(ST.pad);
+  ST.jd=judge(S.natal,ST.x);
+  const x=ST.x;
+  setBg(x.k);
+  FX.set(x.k==='sad'?'rain':x.k==='ang'?'petal':x.k==='hope'?'petal':'dust');
+  $('#rv-zang').textContent=`${x.el} · 入${ZANG[x.el].z} · ${ZANG[x.el].zhi}伤${ZANG[x.el].z}`;
+  $('#rv-name').textContent=x.n;
+  $('#rv-poem').textContent=x.poem;
+  $('#rv-cure').textContent=x.cure;
+  SND.ok();
+  fade(()=>go('#s-reveal'));
 }
 
-/* ════════════════ 流程控制 ════════════════ */
-function show(id){document.querySelectorAll('.layer').forEach(l=>l.classList.remove('on'));if(id)$(id).classList.add('on');}
-function fadeTo(fn){$('#fade').classList.add('on');setTimeout(()=>{fn();$('#fade').classList.remove('on');},800);}
+$('#b-reveal').onclick=()=>{SND.tap();startRite();};
 
-$('#b0').onclick=()=>{show('#s1');showSil(false);playChord();};
-
-$('#b1').onclick=()=>{
-  const y=+$('#by').value,m=+$('#bm').value,d=+$('#bd').value,h=+$('#bh').value;
-  if(!(y>=1901&&y<=2026&&m>=1&&m<=12&&d>=1&&d<=31)){$('#by').focus();return;}
-  S.bazi=ganzhi(y,m,d,h);
-  const bz=S.bazi;
-  S.qIdx=0; S.pad={P:0,A:0,D:0};
-  show('#s_quiz'); renderQuiz(); showSil(false);
-  setTimeout(()=>saySomething(
-    `${bz.pillars.join(' ')}——你命里${bz.strong}盛而${bz.weak}薄。先来三道直觉题，帮你找今日心色。`,false,'btm'),280);
-};
-
-$('#b2').onclick=()=>{
-  S.x=BY_K[S.picks[0]]; S.jd=judge(S.bazi,S.x);
-  tint(S.x,S.deg); hideSay();
-  $('#s3n').textContent=S.x.name;
-  $('#s3d').innerHTML=S.x.desc;
-  $('#s3t').textContent=S.x.pole==='阴'?'心 霾 已 现':'心 晴 已 现';
-  fadeTo(()=>{show('#s3');showSil(false);
-    setTimeout(()=>{showSil(true);saySomething(S.x.act_cure,true,'btm');},700);});
-};
-
-$('#b3').onclick=()=>{show(null);hideSay();showSil(false);startGame();playMelody();};
-
-/* ── 关卡系统 ── */
-const FLOW={
-  anx:['iceWin','flow'],     // 焦虑：框住乱影 → 理水安神
-  lost:['wipe','doorFocus'], // 迷茫：拨云 → 聚焦月洞
-  sad:['flow','rainCalm'],   // 悲伤：理水 → 听雨静坐
-  ang:['break','flow'],      // 愤怒：扫竹 → 理水降火
-  joy:['catch','flow'],      // 喜悦：承光 → 理水沉淀
-  calm:['breathe','flow'],   // 宁静：呼吸引导 → 理水
-  hope:['dewCatch','wipe'],  // 期待：留春 → 拨云
-  firm:['stack','catch']     // 笃定：叠石 → 承光
-};
-const GT={
-  wipe:{n:'拨　云',t:'指尖抹开眼前的雾'},
-  flow:{n:'理　水',t:'划过水面，让它重新流动'},
-  catch:{n:'承　光',t:'点住墙上的光，留住它'},
-  break:{n:'扫　竹',t:'划过竹子，借风清暑'},
-  dewCatch:{n:'留　春',t:'轻触露珠，把春留下来'},
-  iceWin:{n:'框　景',t:'把墙上乱影，一一框进漏窗'},
-  doorFocus:{n:'聚　焦',t:'长按月洞门，只看这一处'},
-  rainCalm:{n:'听　雨',t:'什么都不做，听满三十滴'},
-  breathe:{n:'调　息',t:'跟着水面起伏，吸七呼八'},
-  stack:{n:'叠　石',t:'把散石一块块叠成峰'}
-};
-const STAGE_SAY={
-  wipe:'眼前这片雾，我不替你抹。',
-  flow:'水自己不会动，得有人先划一道。',
-  catch:'光会走的。要留就现在。',
-  break:'风来了。借这阵风，把多余的都让它带走。',
-  dewCatch:'露珠还挂着呢。轻轻一碰，春就算是真的来了。',
-  iceWin:'墙上那些影子吓不到人。框起来看，它们就只是竹子。',
-  doorFocus:'院子太大反而看不见路。按住那扇门，别的先不管。',
-  rainCalm:'这一关不用做什么。坐着，听雨落满三十下。',
-  breathe:'跟着水面走。它涨你吸，它落你呼。',
-  stack:'石头是碎的。碎的也能立成峰——你试试。'
-};
-let seq=[],stage=0;
-function startGame(){
-  S.t0=performance.now(); S.trace={wipe:0,flow:0,catch:0,breaks:0};
-  seq=FLOW[S.x.k]; stage=0; $('#hud').classList.add('on'); runStage();
+/* ═══ 一式 ═══ */
+let riteTimer=null;
+function startRite(){
+  const r=ST.x.rite;
+  ST.riteOk=false;
+  $('#rite-name').textContent=r.t;
+  $('#rite-tip').textContent=r.tip;
+  $('#rite-bar').style.width='0%';
+  $('#rite-count').textContent='';
+  $('#rite-ph').textContent='';
+  $('#rite-n').textContent='';
+  $('#rite-arc').style.strokeDashoffset='515';
+  $('#rite-ring').style.display=(r.kind==='breath')?'block':'none';
+  go('#s-rite');
+  clearInterval(riteTimer); FX.dropCb=null;
+  if(r.kind==='breath') riteBreath(r);
+  else if(r.kind==='wait') riteWait(r);
+  else riteTouch(r);
 }
-function setHud(p){
-  const g=GT[seq[stage]];
-  $('#gname').textContent=g.n; $('#gtip').textContent=g.t;
-  $('#prog i').style.width=(p*100)+'%';
+function riteDone(){
+  ST.riteOk=true; SND.seal();
+  clearInterval(riteTimer); FX.dropCb=null;
+  $('#rite-ring').style.pointerEvents='none';
+  setTimeout(doSeal,760);
 }
-function runStage(){
-  if(stage>=seq.length){finish();return;}
-  const kind=seq[stage];
-  setTimeout(()=>{showSil(true);saySomething(STAGE_SAY[kind],false,'btm');},300);
-  if(kind==='wipe'){FOG.repaint();setHud(0);bindWipe();}
-  else if(kind==='flow'){FOG.hide();setHud(0);bindFlow();}
-  else if(kind==='catch'){FOG.hide();setHud(0);spawnSparks();}
-  else if(kind==='break'){FOG.hide();setHud(0);bindBreak();}
-  else if(kind==='dewCatch'){FOG.hide();setHud(0);spawnDew();}
-  else if(kind==='iceWin'){FOG.hide();setHud(0);bindIceWin();}
-  else if(kind==='doorFocus'){FOG.hide();setHud(0);bindDoorFocus();}
-  else if(kind==='rainCalm'){FOG.hide();setHud(0);bindRainCalm();}
-  else if(kind==='breathe'){FOG.hide();setHud(0);bindBreathe();}
-  else if(kind==='stack'){FOG.hide();setHud(0);bindStack();}
-}
-
-/* 框景：点击墙上狂乱树影，逐一框入漏窗 */
-function bindIceWin(){
-  const el=$('#gl'); el.style.pointerEvents='auto';
-  const rc=new THREE.Raycaster(), v=new THREE.Vector2();
-  let framed=0; const need=Math.min(5,W.wildShadows.length);
-  const click=e=>{
-    const r=el.getBoundingClientRect();
-    v.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
-    rc.setFromCamera(v,W.cam);
-    const live=W.wildShadows.filter(s=>s.visible);
-    const hits=rc.intersectObjects(live,false);
-    if(hits.length){
-      const s=hits[0].object;
-      // 影子被吸入漏窗
-      const sx=s.position.x, sy=s.position.y; let pr=0;
-      const anim=setInterval(()=>{
-        pr+=.06;
-        s.position.x=lerp(sx,-3.1,pr); s.position.y=lerp(sy,2.7,pr);
-        s.scale.setScalar(1-pr*.8); s.material.opacity=.26*(1-pr);
-        if(pr>=1){clearInterval(anim); s.visible=false;}
-      },16);
-      framed++; S.trace.catch++;
-      guqinNote(SCALES[2+framed%4],.7,.08);
-      setHud(framed/need);
-      if(framed>=need){off();advance();}
-    }};
-  function off(){el.removeEventListener('pointerdown',click);el.style.pointerEvents='none';
-    W.wildShadows.forEach(s=>{s.visible=true;s.scale.setScalar(1);s.material.opacity=.26;});}
-  el.addEventListener('pointerdown',click);
-}
-
-/* 聚焦：长按月洞门，周围渐隐，只留一门 */
-function bindDoorFocus(){
-  const el=$('#gl'); el.style.pointerEvents='auto';
-  let held=0, timer=null;
-  const need=260; // 约 4.3 秒
-  const start=()=>{
-    if(timer)return;
-    timer=setInterval(()=>{
-      held++;
-      const p=clamp(held/need,0,1);
-      W.doorGlow.material.opacity=.20+p*.55;
-      W.doorGlow.scale.setScalar(1+p*.22);
-      // 周围压暗
-      W.hemi.intensity=1.1-p*.52;
-      W.rayMat.uniforms.uInt.value=Math.max(.02,(.12+S.x.warm*.28)*(1-p*.8));
-      W.sc.fog.density=(.014+S.x.fog*.018)*(1+p*1.4);
-      setHud(p);
-      if(held>=need){stop();off();advance();}
-    },16);
-  };
-  const stop=()=>{if(timer){clearInterval(timer);timer=null;}};
-  function off(){
-    el.removeEventListener('pointerdown',start);
-    removeEventListener('pointerup',stop);
-    el.style.pointerEvents='none';
-    W.hemi.intensity=1.1; W.sc.fog.density=.014+S.x.fog*.018;
-  }
-  el.addEventListener('pointerdown',start);
-  addEventListener('pointerup',stop);
-}
-
-/* 听雨：无操作关卡，坐等三十滴入水 */
-function bindRainCalm(){
-  let drops=0; const need=30;
-  const iv=setInterval(()=>{
-    drops++; 
-    if(drops%3===0) dropSound();
-    if(drops%8===0) guqinNote(SCALES[Math.floor(rnd(0,4))],1.4,.05);
-    W.ripple(rnd(-2.6,2.6),rnd(-1.6,1.6),.6);
-    W.wuni.uMurk.value=Math.max(.04,W.wuni.uMurk.value*.955);
-    setHud(drops/need);
-    if(drops>=need){clearInterval(iv);advance();}
-  },340);
-}
-
-/* 调息：4-7-8 呼吸，跟随水面起伏 */
-function bindBreathe(){
-  BREATH.active=true; BREATH.t0=performance.now()/1000; BREATH.cycles=0;
-  const box=document.createElement('div');
-  box.id='breathbox';
-  box.style.cssText=`position:absolute;left:0;right:0;top:44%;text-align:center;z-index:6;
-    pointer-events:none;transition:.4s`;
-  box.innerHTML=`<div id="bphase" style="font-size:26px;letter-spacing:.42em;color:#3a3228;
-      text-shadow:0 2px 18px rgba(253,250,243,.96)"></div>
-    <div id="bcount" style="font-size:44px;letter-spacing:.1em;color:#8c7f68;margin-top:10px;
-      text-shadow:0 2px 14px rgba(253,250,243,.96)"></div>
-    <div id="bcycle" style="font-size:10px;letter-spacing:.3em;color:#b8ac96;margin-top:16px"></div>`;
-  $('#frame').appendChild(box);
-  let lastPhase='';
-  const iv=setInterval(()=>{
-    const t=performance.now()/1000;
-    const [lab,n]=BREATH.label(t);
-    $('#bphase').textContent=lab;
-    $('#bcount').textContent=n;
-    if(lab!==lastPhase){
-      lastPhase=lab;
-      if(lab==='吸　气'){ guqinNote(SCALES[0],1.6,.06); BREATH.cycles++; }
-      else if(lab==='呼　气') guqinNote(SCALES[2],2.0,.05);
-      else dropSound();
-    }
-    $('#bcycle').textContent=`第 ${Math.min(BREATH.cycles,BREATH.need)} / ${BREATH.need} 息`;
-    setHud(clamp(BREATH.cycles/BREATH.need,0,1));
-    // 呼吸驱动光影
-    const ph=BREATH.phase(t);
-    W.fill.intensity=(.38+S.x.warm*.76)*(.7+ph*.6);
-    if(BREATH.cycles>BREATH.need){
-      clearInterval(iv); BREATH.active=false;
-      box.style.opacity='0'; setTimeout(()=>box.remove(),420);
-      advance();
-    }
+function riteBreath(r){
+  const CY=19, t0=performance.now()/1000;
+  let cyc=0,last='';
+  riteTimer=setInterval(()=>{
+    const e=((performance.now()/1000)-t0)%CY;
+    const c=Math.floor(((performance.now()/1000)-t0)/CY);
+    let ph,n,prog;
+    if(e<4){ph='吸　气';n=Math.ceil(4-e);prog=e/4;}
+    else if(e<11){ph='屏　息';n=Math.ceil(11-e);prog=1;}
+    else{ph='呼　气';n=Math.ceil(19-e);prog=1-(e-11)/8;}
+    $('#rite-ph').textContent=ph;
+    $('#rite-n').textContent=n;
+    $('#rite-arc').style.strokeDashoffset=515*(1-prog);
+    if(ph!==last){last=ph;tone(ph==='吸　气'?392:ph==='呼　气'?261.6:329.6,1.1,.032);}
+    if(c>cyc){cyc=c;}
+    $('#rite-bar').style.width=clamp(cyc/r.need,0,1)*100+'%';
+    $('#rite-count').textContent=`第 ${Math.min(cyc+1,r.need)} ／ ${r.need} 息`;
+    if(cyc>=r.need) riteDone();
   },100);
 }
-
-/* 叠石：拖散石到基座，逐块叠成峰 */
-function bindStack(){
-  const el=$('#gl'); el.style.pointerEvents='auto';
-  const rc=new THREE.Raycaster(), v=new THREE.Vector2();
-  let placed=0; const need=W.looseStones.length;
-  const click=e=>{
-    const r=el.getBoundingClientRect();
-    v.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
-    rc.setFromCamera(v,W.cam);
-    const live=W.looseStones.filter(s=>!s.userData.placed);
-    const hits=rc.intersectObjects(live,false);
-    if(hits.length){
-      const st=hits[0].object;
-      const slot=W.STONE_SLOTS[placed];
-      const p0=st.position.clone(); let pr=0;
-      st.userData.placed=true;
-      const anim=setInterval(()=>{
-        pr+=.05;
-        // 抛物线上抬
-        st.position.x=lerp(p0.x,slot[0],pr);
-        st.position.z=lerp(p0.z,slot[2],pr);
-        st.position.y=lerp(p0.y,slot[1],pr)+Math.sin(pr*Math.PI)*.7;
-        st.rotation.y+=.08;
-        if(pr>=1){clearInterval(anim);
-          st.position.set(slot[0],slot[1],slot[2]);
-          dropSound(); guqinNote(SCALES[placed%5],1.2,.09);}
-      },16);
-      placed++; setHud(placed/need);
-      if(placed>=need){off();setTimeout(advance,700);}
-    }};
-  function off(){el.removeEventListener('pointerdown',click);el.style.pointerEvents='none';}
-  el.addEventListener('pointerdown',click);
-}
-function advance(){$('#prog i').style.width='100%';hideSay();stage++;setTimeout(runStage,540);}
-
-function bindWipe(){
-  const c=$('#fogc');let down=false,last=null;
-  c.style.pointerEvents='auto';
-  const pt=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*devicePixelRatio,(e.clientY-r.top)*devicePixelRatio];};
-  const on=e=>{down=true;last=pt(e);FOG.wipe(...last);};
-  const mv=e=>{if(!down)return;const p=pt(e);
-    if(last){const dd=Math.hypot(p[0]-last[0],p[1]-last[1])/devicePixelRatio;S.trace.wipe+=dd;
-      const st=Math.max(1,Math.ceil(dd/18));
-      for(let i=1;i<=st;i++)FOG.wipe(lerp(last[0],p[0],i/st),lerp(last[1],p[1],i/st));}
-    last=p;const rt=FOG.ratio();setHud(clamp(rt/.6,0,1));
-    if(rt>.6){off();advance();}};
-  const up=()=>{down=false;last=null;};
-  function off(){c.removeEventListener('pointerdown',on);c.removeEventListener('pointermove',mv);
-    removeEventListener('pointerup',up);c.style.pointerEvents='none';}
-  c.addEventListener('pointerdown',on);c.addEventListener('pointermove',mv);addEventListener('pointerup',up);
-}
-function bindFlow(){
-  const el=$('#gl');el.style.pointerEvents='auto';
-  const rc=new THREE.Raycaster(),v=new THREE.Vector2();
-  let down=false,last=null,acc=0;
-  const hit=e=>{const r=el.getBoundingClientRect();
-    v.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
-    rc.setFromCamera(v,W.cam);const h=rc.intersectObject(W.water,false);
-    if(!h.length)return null;const lp=W.water.worldToLocal(h[0].point.clone());return[lp.x,lp.y];};
-  const on=e=>{down=true;const p=hit(e);if(p){last=p;W.ripple(p[0],p[1],1);}};
-  const mv=e=>{if(!down)return;const p=hit(e);if(!p)return;
-    if(last){const dd=Math.hypot(p[0]-last[0],p[1]-last[1]);acc+=dd;S.trace.flow+=dd;
-      if(dd>.1)W.ripple(p[0],p[1],.92);}
-    last=p;const base=S.x.murk*(.6+S.deg*.16);
-    W.wuni.uMurk.value=Math.max(.03,base*(1-clamp(acc/13,0,1)));
-    setHud(clamp(acc/13,0,1));if(acc>13){off();advance();}};
-  const up=()=>{down=false;last=null;};
-  function off(){el.removeEventListener('pointerdown',on);el.removeEventListener('pointermove',mv);
-    removeEventListener('pointerup',up);el.style.pointerEvents='none';}
-  el.addEventListener('pointerdown',on);el.addEventListener('pointermove',mv);addEventListener('pointerup',up);
-}
-function bindBreak(){
-  // 扫竹：在竹上滑动即折倒
-  const el=$('#gl');el.style.pointerEvents='auto';
-  let broken=0,needed=Math.min(5,W.bams.length);
-  const rc=new THREE.Raycaster(),v=new THREE.Vector2();
-  const mv=e=>{
-    const r=el.getBoundingClientRect();
-    v.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
-    rc.setFromCamera(v,W.cam);
-    const meshes=W.bams.filter(g=>g.userData.alive).map(g=>g.children[0]);
-    const hits=rc.intersectObjects(meshes,false);
-    if(hits.length){
-      const bamIdx=W.bams.findIndex(g=>g.children.includes(hits[0].object));
-      if(bamIdx>=0&&W.bams[bamIdx].userData.alive){
-        breakBamboo(bamIdx); broken++; S.trace.breaks++;
-        setHud(broken/needed);
-        if(broken>=needed){off();advance();}
-      }
-    }};
-  function off(){el.removeEventListener('pointermove',mv);el.style.pointerEvents='none';}
-  el.addEventListener('pointermove',mv);
-}
-function spawnSparks(){
-  const fr=$('#frame'),need=6;let got=0;
-  [[.28,.36],[.44,.28],[.6,.34],[.7,.46],[.36,.5],[.54,.44]].forEach((p,i)=>{
-    const s=document.createElement('div');s.className='spark';
-    s.style.left=(p[0]*100)+'%';s.style.top=(p[1]*100)+'%';s.style.animationDelay=(i*.28)+'s';
-    s.onclick=()=>{if(s.classList.contains('gone'))return;
-      s.classList.add('gone');got++;S.trace.catch++;
-      W.fill.intensity+=.24;W.rayMat.uniforms.uInt.value+=.04;
-      dropSound(); setHud(got/need);setTimeout(()=>s.remove(),620);
-      if(got>=need)advance();};
-    fr.appendChild(s);
-  });
-}
-function spawnDew(){
-  // 露珠模式：点击3D场景中露珠
-  const el=$('#gl');el.style.pointerEvents='auto';
-  let caught=0,needed=Math.min(4,W.dewDrops.length);
-  const rc=new THREE.Raycaster(),v=new THREE.Vector2();
-  const click=e=>{
-    const r=el.getBoundingClientRect();
-    v.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
-    rc.setFromCamera(v,W.cam);
-    const meshes=W.dewDrops.filter(d=>!d.userData.caught);
-    const hits=rc.intersectObjects(meshes,false);
-    if(hits.length){
-      const d=hits[0].object; d.userData.caught=true;
-      d.visible=false; caught++; S.trace.catch++;
-      dropSound(); guqinNote(SCALES[4],.8,.10);
-      setHud(caught/needed);
-      if(caught>=needed){off();advance();}
-    }};
-  function off(){el.removeEventListener('pointerdown',click);el.style.pointerEvents='none';}
-  el.addEventListener('pointerdown',click);
-}
-
-/* ════════════════ 画卷生成（苏州五色·廊桥·漏窗·水榭·荷叶） ════════════════ */
-function paintScroll(){
-  const c=$('#scrollc'),DPR=Math.min(devicePixelRatio,2);
-  const fw=$('#frame').clientWidth-48, fh=Math.round(fw*1.40);
-  c.style.width=fw+'px'; c.style.height=fh+'px'; c.width=fw*DPR; c.height=fh*DPR;
-  const x=c.getContext('2d'); x.scale(DPR,DPR);
-  const W2=fw,H=fh, X=S.x, bz=S.bazi, k=.6+S.deg*.16;
-
-  // 宣纸底
-  const pg=x.createLinearGradient(0,0,0,H);
-  pg.addColorStop(0,'#fbf7ee');pg.addColorStop(1,'#efe8d8');
-  x.fillStyle=pg;x.fillRect(0,0,W2,H);
-  // 噪点
-  for(let i=0;i<3200;i++){x.fillStyle=`rgba(144,126,96,${Math.random()*.032})`;
-    x.fillRect(Math.random()*W2,Math.random()*H,1,1);}
-
-  // 天色渐变
-  const skyGrad=x.createLinearGradient(0,0,0,H*.56);
-  skyGrad.addColorStop(0,hexA(X.hue,.34*k));skyGrad.addColorStop(1,hexA(X.hue,0));
-  x.fillStyle=skyGrad;x.fillRect(0,0,W2,H*.56);
-
-  // 五行远山（每行数量决定层高）
-  const els=['木','火','土','金','水'];
-  els.forEach((e,i)=>{
-    const amt=bz.cnt[e]/8, ybase=H*(.22+i*.042);
-    x.beginPath();x.moveTo(0,ybase+44);
-    for(let px=0;px<=W2;px+=7){
-      const yy=ybase-Math.sin(px/W2*Math.PI*(1.1+i*.32)+i)*32*(.5+amt)-Math.sin(px/W2*Math.PI*5+i*2)*8*amt;
-      x.lineTo(px,yy);
-    }
-    x.lineTo(W2,ybase+44);x.lineTo(W2,H);x.lineTo(0,H);x.closePath();
-    x.fillStyle=hexA(EL_COLOR[e],.10+amt*.28);x.fill();
-  });
-
-  // 白墙 + 屋脊瓦片
-  const wy=H*.44, wh=H*.22;
-  x.fillStyle='rgba(253,251,246,.96)';x.fillRect(W2*.05,wy,W2*.90,wh);
-  x.strokeStyle='rgba(120,104,80,.24)';x.lineWidth=1;x.strokeRect(W2*.05,wy,W2*.90,wh);
-  // 瓦檐
-  x.fillStyle='#565f67';x.fillRect(W2*.03,wy-10,W2*.94,10);
-  const nTile=Math.floor(W2*.94/10);
-  for(let i=0;i<nTile;i++){
-    x.beginPath();x.arc(W2*.03+5.5+i*10,wy-10,5,Math.PI,0);
-    x.fillStyle='#4b545c';x.fill();
-  }
-  // 飞檐翘角
-  x.beginPath();x.moveTo(W2*.03,wy-10);x.quadraticCurveTo(0,wy-28,W2*.04,wy-22);
-  x.lineWidth=3;x.strokeStyle='#4b545c';x.stroke();
-  x.beginPath();x.moveTo(W2*.97,wy-10);x.quadraticCurveTo(W2,wy-28,W2*.96,wy-22);
-  x.stroke();
-
-  // 月洞门
-  const mx0=W2*.5,my0=wy+wh*.52,mr=wh*.40;
-  x.save();x.beginPath();x.arc(mx0,my0,mr,0,6.2832);x.clip();
-  const mg=x.createLinearGradient(0,my0-mr,0,my0+mr);
-  mg.addColorStop(0,hexA(X.hue,.38));mg.addColorStop(1,'rgba(226,232,238,.96)');
-  x.fillStyle=mg;x.fillRect(mx0-mr,my0-mr,mr*2,mr*2);
-  // 门内假山
-  x.fillStyle='rgba(100,120,112,.48)';
-  x.beginPath();x.moveTo(mx0-mr,my0+mr);
-  for(let px=-mr;px<=mr;px+=4)x.lineTo(mx0+px,my0+8-Math.cos(px/mr*1.4)*mr*.38);
-  x.lineTo(mx0+mr,my0+mr);x.closePath();x.fill();
-  x.restore();
-  x.beginPath();x.arc(mx0,my0,mr,0,6.2832);x.strokeStyle='#565f67';x.lineWidth=3.5;x.stroke();
-
-  // 漏窗花格（左侧）
-  const lx=W2*.12,ly=wy+wh*.22,ls=W2*.14;
-  x.strokeStyle='rgba(90,99,107,.42)';x.lineWidth=1.2;
-  x.strokeRect(lx,ly,ls,ls);
-  const ng=4;
-  for(let i=1;i<ng;i++){
-    x.beginPath();x.moveTo(lx+ls*i/ng,ly);x.lineTo(lx+ls*i/ng,ly+ls);x.stroke();
-    x.beginPath();x.moveTo(lx,ly+ls*i/ng);x.lineTo(lx+ls,ly+ls*i/ng);x.stroke();
-  }
-  // 菱格
-  for(let i=0;i<ng;i++)for(let j=0;j<ng;j++){
-    const cx=lx+ls*(i+.5)/ng,cy=ly+ls*(j+.5)/ng,r=ls/ng*.36;
-    x.beginPath();x.moveTo(cx,cy-r);x.lineTo(cx+r,cy);x.lineTo(cx,cy+r);x.lineTo(cx-r,cy);x.closePath();
-    x.strokeStyle='rgba(90,99,107,.32)';x.stroke();
-  }
-
-  // 廊桥（右侧）
-  const bx0=W2*.64,bxE=W2*.95, bky=wy+wh*.82;
-  x.fillStyle='rgba(210,202,186,.82)';
-  x.fillRect(bx0,bky-6,bxE-bx0,6);
-  const nc=5;
-  for(let i=0;i<=nc;i++){
-    const cx=bx0+(bxE-bx0)*i/nc;
-    x.fillStyle='rgba(190,182,166,.72)';x.fillRect(cx-3,bky-18,6,18);
-  }
-  x.fillStyle='rgba(175,165,148,.64)';x.fillRect(bx0,bky-22,(bxE-bx0),4);
-
-  // 水榭
-  const px0=W2*.62,pky=wy+wh+8,pW=W2*.22,pH=W2*.10;
-  x.fillStyle='rgba(248,245,238,.78)';x.fillRect(px0,pky,pW,pH);
-  // 小屋脊
-  x.fillStyle='#565f67';
-  x.beginPath();x.moveTo(px0-4,pky);x.lineTo(px0+pW/2,pky-pH*.7);x.lineTo(px0+pW+4,pky);x.closePath();x.fill();
-
-  // 水面（波纹数量=清浊）
-  const wpy=H*.68;
-  const wg=x.createLinearGradient(0,wpy,0,H*.92);
-  wg.addColorStop(0,hexA(X.hue,.42*k));
-  wg.addColorStop(1,`rgba(${Math.round(X.water[0]*255)},${Math.round(X.water[1]*255)},${Math.round(X.water[2]*255)},.60)`);
-  x.fillStyle=wg;
-  x.beginPath();x.moveTo(W2*.04,wpy+10);
-  x.bezierCurveTo(W2*.3,wpy-6,W2*.7,wpy+20,W2*.96,wpy+4);
-  x.lineTo(W2*.96,H*.91);x.lineTo(W2*.04,H*.91);x.closePath();x.fill();
-  const ripN=Math.round(5+(1-W.wuni.uMurk.value)*11);
-  for(let i=0;i<ripN;i++){
-    const ry=wpy+20+i*((H*.88-wpy-20)/ripN);
-    x.strokeStyle=`rgba(255,255,255,${.28-i*.014})`;x.lineWidth=1;
-    x.beginPath();
-    for(let px=W2*.06;px<W2*.94;px+=5)x.lineTo(px,ry+Math.sin(px/24+i)*2.2);
-    x.stroke();
-  }
-
-  // 荷叶
-  const soilAmt=bz.cnt['土']/8;
-  [[.22,.3],[.40,.5],[.32,.7],[.18,.6],[.50,.4]].forEach((p,i)=>{
-    const hx=W2*(p[0]+.02*i),hy=wpy+22+i*16,hr=(16+soilAmt*8)*DPR*.5;
-    x.beginPath();x.ellipse(hx,hy,hr,hr*.64,i*.8,0,6.28);
-    x.fillStyle=`rgba(92,138,104,${.40+i*.04})`;x.fill();
-    // 叶脉
-    x.strokeStyle=`rgba(68,110,80,${.24})`;x.lineWidth=1;
-    for(let v2=0;v2<5;v2++){
-      x.beginPath();x.moveTo(hx,hy);
-      x.lineTo(hx+Math.cos(v2/5*6.28)*hr*.82,hy+Math.sin(v2/5*6.28)*hr*.54);x.stroke();
-    }
-  });
-
-  // 太湖石（土气影响大小）
-  function rock(cx,cy,rr,seed){
-    x.beginPath();
-    for(let a2=0;a2<=6.29;a2+=.16){
-      const n2=1+Math.sin(a2*3+seed)*.22+Math.sin(a2*7+seed*2)*.12;
-      const ppx=cx+Math.cos(a2)*rr*n2,ppy=cy+Math.sin(a2)*rr*n2*.9;
-      a2<.01?x.moveTo(ppx,ppy):x.lineTo(ppx,ppy);
-    }
-    x.closePath();
-    const rg=x.createLinearGradient(cx-rr,cy-rr,cx+rr,cy+rr);
-    rg.addColorStop(0,hexA(EL_COLOR['木'],.54));rg.addColorStop(1,'rgba(88,104,96,.74)');
-    x.fillStyle=rg;x.fill();
-    x.strokeStyle='rgba(70,84,78,.44)';x.lineWidth=1.2;x.stroke();
-    for(let h2=0;h2<3;h2++){
-      const hx=cx+(Math.random()-.5)*rr,hy=cy+(Math.random()-.5)*rr*.9;
-      x.beginPath();x.ellipse(hx,hy,rr*.14,rr*.09,Math.random()*3,0,6.28);
-      x.fillStyle='rgba(252,248,240,.38)';x.fill();
-    }
-  }
-  const rs=.85+soilAmt*.5;
-  rock(W2*.18,wpy+6,wh*.28*rs,1.3); rock(W2*.22,wpy-wh*.2,wh*.18*rs,4.1);
-  rock(W2*.82,wpy+12,wh*.20*rs,7.7);
-
-  // 竹（木气决定数量+高度）
-  const woodAmt=bz.cnt['木']/8, nb=Math.round(3+woodAmt*7);
-  for(let i=0;i<nb;i++){
-    const bx2=W2*(.07+Math.random()*.15)+(i%2?W2*.66:0);
-    const bh2=wh*(1.4+woodAmt*1.3+Math.random()*.4), by2=wy+wh;
-    x.strokeStyle=`rgba(106,140,92,${.52+Math.random()*.28})`;x.lineWidth=1.8+Math.random()*1.4;
-    x.beginPath();x.moveTo(bx2,by2);x.quadraticCurveTo(bx2+7,by2-bh2*.6,bx2+3,by2-bh2);x.stroke();
-    for(let j=0;j<5;j++){
-      const ly=by2-bh2*(.42+j*.11);
-      x.strokeStyle='rgba(96,128,84,.44)';x.lineWidth=1.2;
-      x.beginPath();x.moveTo(bx2+3,ly);x.quadraticCurveTo(bx2+16,ly-6,bx2+25,ly-2);x.stroke();
-      x.beginPath();x.moveTo(bx2+1,ly+2);x.quadraticCurveTo(bx2-12,ly-3,bx2-22,ly);x.stroke();
-    }
-  }
-
-  // 寻芳场景：加梅花
-  if(X.k==='hope'){
-    for(let i=0;i<14;i++){
-      const fx=rnd(W2*.08,W2*.36),fy=rnd(wy*.8,wy*.98);
-      x.beginPath();x.arc(fx,fy,rnd(3,7),0,6.28);
-      x.fillStyle=hexA('#fce8f0',rnd(.6,.9));x.fill();
-    }
-  }
-  // 扫竹场景：有倒伏竹影
-  if(X.k==='ang'){
-    x.strokeStyle='rgba(80,110,70,.22)';x.lineWidth=2.5;
-    x.beginPath();x.moveTo(W2*.12,wy+wh);x.quadraticCurveTo(W2*.35,wy+wh+12,W2*.55,wy+wh+6);x.stroke();
-  }
-
-  // 丁达尔光柱
-  x.save();x.globalCompositeOperation='screen';
-  for(let i=0;i<4;i++){
-    const llx=W2*(.14+i*.20);
-    const llg=x.createLinearGradient(llx,0,llx+W2*.09,H*.72);
-    llg.addColorStop(0,hexA('#fff5d8',.30*(.4+X.warm)));llg.addColorStop(1,'rgba(255,245,216,0)');
-    x.fillStyle=llg;
-    x.beginPath();x.moveTo(llx,0);x.lineTo(llx+W2*.06,0);
-    x.lineTo(llx+W2*.16,H*.74);x.lineTo(llx+W2*.05,H*.74);x.closePath();x.fill();
-  }
-  x.restore();
-
-  // 题跋 + 朱砂印
-  x.fillStyle='rgba(44,40,32,.88)';
-  x.font=`${Math.round(W2*.054)}px "Songti SC",STSong,serif`;
-  x.textAlign='left';x.fillText(X.name.replace(' · ','　'),W2*.09,H*.072);
-  x.font=`${Math.round(W2*.028)}px "Songti SC",STSong,serif`;
-  x.fillStyle='rgba(88,80,66,.80)';x.fillText(X.song,W2*.09,H*.106);
-  x.font=`${Math.round(W2*.022)}px "Songti SC",STSong,serif`;
-  x.fillStyle='rgba(116,106,86,.68)';
-  x.fillText(`${bz.pillars.join(' ')} · ${X.hn} ${X.el}入${ZANG[X.el].zang} · ${S.jd.type}`,W2*.09,H*.955);
-  // 朱砂印章
-  x.strokeStyle='rgba(168,81,47,.82)';x.lineWidth=2;
-  const sx=W2*.80,sy=H*.882,ss=W2*.105;
-  x.strokeRect(sx,sy,ss,ss);
-  x.fillStyle='rgba(168,81,47,.84)';
-  x.font=`${Math.round(ss*.38)}px "Songti SC",STSong,serif`;
-  x.textAlign='center';
-  x.fillText('心园',sx+ss*.5,sy+ss*.46);
-  x.fillText('留念',sx+ss*.5,sy+ss*.86);
-}
-
-/* ════════════════ 落印报告 ════════════════ */
-function finish(){
-  $('#hud').classList.remove('on');
-  document.querySelectorAll('.spark').forEach(s=>s.remove());
-  const X=S.x,bz=S.bazi,jd=S.jd;
-  const dur=Math.round((performance.now()-S.t0)/1000);
-  const tempo=dur<26?'急':dur<54?'匀':'缓';
-  const tempoTxt={急:'你走得很快，几乎没有停顿——身体在提示你想尽快脱离这个状态。',
-    匀:'你的节奏平稳，说明此刻你的注意力有地方可以安放。',
-    缓:'你在园子里停留得久，反复停在同一处——这是身体在给情绪一个出口，不急。'}[tempo];
-  const second=S.picks[1]?BY_K[S.picks[1]]:null, third=S.picks[2]?BY_K[S.picks[2]]:null;
-  const tot=Object.values(bz.cnt).reduce((a,b)=>a+b,0);
-  const padTxt=`愉悦度${{'-2':'很低','-1':'偏低','1':'一般','2':'较高','3':'高'}[S.pad.P]||'-'}　唤醒度${{'-2':'很低','-1':'偏低','1':'一般','2':'较高','3':'高'}[S.pad.A]||'-'}　掌控感${{'-2':'很低','-1':'偏低','1':'一般','2':'较高','3':'高'}[S.pad.D]||'-'}`;
-
-  paintScroll();
-  showSil(true);
-  $('#scrollwrap').classList.add('on');
-  setTimeout(()=>saySomething(X.act_cure,true,'btm'),920);
-
-  $('#rep').innerHTML=`
-    <div class="stamp">心园<br>留念</div>
-    <div class="verdict">${X.act_cure}</div>
-    <div class="vsrc">心 园 落 印 · ${X.name}</div>
-
-    <div class="card">
-      <div class="ctag">其 一 · 情 绪 三 维 测 得</div>
-      <div class="ctitle">${X.emo}（${X.emo2}）</div>
-      <div class="ctxt">${padTxt}<br><br>
-        你先取<b>${X.hn}</b>，此色属<b>${X.el}</b>，入<b>${ZANG[X.el].zang}</b>，${ZANG[X.el].fn}，其志为<b>${ZANG[X.el].zhi}</b>。
-        今日这份<em>${X.emo}</em>，说到底是<b>${X.zhiTxt}</b>。
-        ${second?`旁边还有${second.hn}（${second.el}·${second.emo}）${third?`与${third.hn}`:''}牵着——这不是一种情绪，是一组。`:''}
-      </div>
-      <div class="row">
-        <div class="chip"><i>情 志</i><b>${ZANG[X.el].zhi}</b></div>
-        <div class="chip"><i>所 属</i><b>${ZANG[X.el].zang}</b></div>
-        <div class="chip"><i>分 量</i><b>${DEGW[S.deg]}</b></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="ctag">其 二 · 命 局 相 参</div>
-      <div class="ctitle">${jd.head}　·　${jd.type}</div>
-      <div class="ctxt">${jd.body}<br><br><b>调法：</b>${jd.fix}</div>
-      <div class="bars">
-        ${['木','火','土','金','水'].map(e=>{
-          const pc=bz.cnt[e]/tot;
-          return `<div class="bar"><u>${e}</u><s><i style="width:${Math.min(100,(pc*280)).toFixed(0)}%;background:${EL_COLOR[e]};opacity:${e===X.el?1:.46}"></i></s>
-          <em>${ZANG[e].zang}·${ZANG[e].zhi}</em></div>`;}).join('')}
-      </div>
-      <div class="ctxt" style="margin-top:10px;font-size:11px;color:#8d8471">
-        ${bz.pillars.join('　')}　日主${bz.dayGan}（${bz.dayEl}）
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="ctag">其 三 · 行 为 读 数</div>
-      <div class="ctitle">${X.ice}</div>
-      <div class="ctxt">${X.act_cbt}<br><br>${tempoTxt}
-        <br><br>造园历时 <b>${dur}s</b>（${tempo}）　抹雾 <b>${Math.round(S.trace.wipe)}px</b>　理水 <b>${S.trace.flow.toFixed(1)}</b>　承光 <b>${S.trace.catch}</b> 次${S.trace.breaks?`　扫竹 <b>${S.trace.breaks}</b> 棵`:''}
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="ctag">其 四 · 今 日 三 件 事（可执行）</div>
-      <div class="ctitle">不需要今天就想明白，只需要做这三件</div>
-      <div class="act-row">
-        <p><b>认 知</b>　${X.act_cbt}</p>
-        <p><b>行 为</b>　${X.act_do}</p>
-        <p><b>养 气</b>　${X.act_body}</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="ctag">其 五 · 如 何 开 口</div>
-      <div class="ctitle">一句话，不用解释，不用道歉</div>
-      <div class="ctxt">${X.act_link}</div>
-    </div>
-
-    <div class="foot">
-      园 无 死 局 　 移 步 自 成 景<br>
-      本页为心理自助体验，不构成医疗诊断<br>
-      持续低落逾两周，请寻求专业帮助
-    </div>
-    <button class="again" id="again">再 造 一 园</button>
-  `;
-
-  $('#scrollc').onclick=()=>{
-    $('#scrollwrap').classList.remove('on');
-    hideSay(); showSil(false);
-    setTimeout(()=>{$('#rep').classList.add('on');$('#rep').scrollTop=0;
-      $('#again').onclick=resetGame;},420);
+function riteWait(r){
+  let n=0;
+  FX.dropCb=()=>{
+    n++;
+    if(n%3===0) SND.drop();
+    $('#rite-bar').style.width=clamp(n/r.need,0,1)*100+'%';
+    $('#rite-count').textContent=`已落 ${Math.min(n,r.need)} ／ ${r.need} 滴`;
+    if(n>=r.need){FX.dropCb=null;riteDone();}
   };
-  $('#scrolltip').textContent='点 画 · 看 判 语';
+  $('#rite-count').textContent=`已落 0 ／ ${r.need} 滴`;
 }
-function resetGame(){
-  $('#rep').classList.remove('on');hideSay();showSil(false);
-  W.wuni.uRip.value.forEach(v=>v.set(0,0,0));FOG.hide();
-  W.bams.forEach(g=>{g.userData.alive=true;g.scale.setScalar(1);g.position.y=0;g.rotation.z=g.userData.base;g.visible=true;});
-  if(W.dewDrops) W.dewDrops.forEach(d=>{d.userData.caught=false;d.visible=true;});
-  if(W.wildShadows) W.wildShadows.forEach(s=>{s.visible=true;s.scale.setScalar(1);s.material.opacity=.26;});
-  if(W.looseStones) W.looseStones.forEach(st=>{st.userData.placed=false;st.position.set(...st.userData.home);});
-  BREATH.active=false;
-  const bb=$('#breathbox'); if(bb) bb.remove();
-  W.hemi.intensity=1.1;
-  fadeTo(()=>{INK.clear();S.qIdx=0;S.pad={P:0,A:0,D:0};show('#s_quiz');renderQuiz();
-    setTimeout(()=>saySomething('再来一次，今日与昨日总是不同的。',false,'btm'),400);});
+function riteTouch(r){
+  let n=0;
+  const scr=$('#s-rite');
+  $('#rite-count').textContent=`0 ／ ${r.need}`;
+  const onHit=e=>{
+    if(e.target.closest('.btn'))return;
+    n++; SND.tap();
+    // 触点涟漪
+    const rect=scr.getBoundingClientRect();
+    const d=document.createElement('div');
+    d.style.cssText=`position:absolute;left:${e.clientX-rect.left}px;top:${e.clientY-rect.top}px;
+      width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;pointer-events:none;
+      border:1px solid rgba(44,40,32,.4);animation:rp .7s ease-out forwards;z-index:9`;
+    scr.appendChild(d); setTimeout(()=>d.remove(),720);
+    $('#rite-bar').style.width=clamp(n/r.need,0,1)*100+'%';
+    $('#rite-count').textContent=`${Math.min(n,r.need)} ／ ${r.need}`;
+    if(n>=r.need){scr.removeEventListener('pointerdown',onHit);riteDone();}
+  };
+  scr.addEventListener('pointerdown',onHit);
 }
 
-/* ════════════════ 启动 ════════════════ */
-initGL();
+/* ═══ 落印 ═══ */
+function doSeal(){
+  const x=ST.x, jd=ST.jd, t=todayKey();
+  if(!S.days.find(d=>d.date===t)){
+    S.days.push({date:t,k:x.k,el:x.el,pad:{...ST.pad},term:solarTerm()});
+    if(S.days.length>400) S.days=S.days.slice(-400);
+    DB.save(S);
+  }
+  $('#seal-line').textContent=x.cure;
+  $('#seal-vow').innerHTML=x.vow;
+  const st=streak();
+  $('#seal-streak').textContent=st>1?`连来第 ${st} 日　共 ${S.days.length} 园`:`共 ${S.days.length} 园`;
+  FX.set('dust');
+  fade(()=>go('#s-seal'));
+}
+function streak(){
+  if(!S.days.length)return 0;
+  const set=new Set(S.days.map(d=>d.date));
+  let n=0; const d=new Date();
+  for(;;){
+    const k=`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    if(set.has(k)){n++;d.setDate(d.getDate()-1);}else break;
+  }
+  return n;
+}
+
+$('#b-done').onclick=()=>{
+  SND.tap();
+  fade(()=>{go('#s-gate');setBg('calm');FX.set('dust');});
+};
+$('#b-almanac').onclick=()=>{SND.tap();renderAlmanac();fade(()=>go('#s-almanac'));};
+$('#b-back').onclick=()=>{
+  SND.tap();
+  const t=todayKey();
+  fade(()=>{go(S.days.find(d=>d.date===t)?'#s-gate':'#s-gate');setBg('calm');FX.set('dust');});
+};
+$('#b-reset').onclick=()=>{
+  if(!confirm('重设生辰会清空全部园记，确定？'))return;
+  DB.wipe(); S=DB.init();
+  fade(()=>{go('#s-gate');setBg('calm');});
+  toast('已清空，可重新起园');
+};
+
+/* ═══ 年鉴 ═══ */
+function renderAlmanac(){
+  const n=S.days.length, nt=S.natal;
+  const tot=nt?Object.values(nt.cnt).reduce((a,b)=>a+b,0):1;
+  const last=S.days[S.days.length-1];
+  const lx=last?BYK[last.k]:null;
+  let html=`<div class="alm-head">心 园 年 鉴</div>
+    <div class="alm-title">${solarTerm()}</div>`;
+
+  // 今日
+  if(lx&&last.date===todayKey()){
+    const jd=judge(nt,lx);
+    html+=`<div class="card">
+      <div class="t">今 日 心 相</div>
+      <div class="h">${lx.n}　·　${lx.emo}</div>
+      <div class="b">${lx.el}属入<b>${ZANG[lx.el].z}</b>，${ZANG[lx.el].fn}，其志为<b>${ZANG[lx.el].zhi}</b>。<br><br>${lx.read}</div>
+    </div>
+    <div class="card">
+      <div class="t">其 二 · 命 局 相 参</div>
+      <div class="h">${jd.head}　·　${jd.type}</div>
+      <div class="b">${jd.body}<br><br><b>调法：</b>${jd.fix}</div>
+      <div class="bars">${['木','火','土','金','水'].map(e=>{
+        const pc=nt.cnt[e]/tot;
+        return `<div class="bar"><u>${e}</u><s><i style="width:${Math.min(100,pc*300).toFixed(0)}%;background:${EL_C[e]};opacity:${e===lx.el?1:.42}"></i></s><em>${ZANG[e].z}·${ZANG[e].zhi}</em></div>`;
+      }).join('')}</div>
+      <div class="b" style="margin-top:var(--s3);font-size:11px;color:var(--ink-5)">
+        ${nt.pillars.join('　')}　日主${nt.dayGan}（${nt.dayEl}）</div>
+    </div>
+    <div class="card">
+      <div class="t">其 三 · 冰 山 之 下</div>
+      <div class="h">你真正要的，不在表层</div>
+      <div class="b">${lx.berg}</div>
+    </div>
+    <div class="card">
+      <div class="t">其 四 · 今 日 三 件 事</div>
+      <div class="h">${lx.mech}</div>
+      <div class="b"><b>认知　</b>${lx.cbt}<br><br><b>行为　</b>${lx.vow}<br><br><b>养气　</b>取<b>${EL_HUE[jd.fixEl]}</b>之色。${EL_ACT[jd.fixEl]}</div>
+    </div>`;
+  }
+
+  // 长卷（满3日）
+  if(n>=3){
+    const recent=S.days.slice(-30);
+    html+=`<div class="card">
+      <div class="t">其 五 · 心 相 长 卷</div>
+      <div class="h">近 ${recent.length} 日</div>
+      <div class="strip">${recent.map(d=>{
+        const xx=BYK[d.k], hv=(d.pad.P+2)/5;
+        return `<i style="background:${EL_C[xx.el]};height:${20+hv*24}px;opacity:${.5+hv*.5}" title="${d.date} ${xx.emo}"></i>`;
+      }).join('')}</div>
+      <div class="strip-x"><span>${recent[0].date.slice(5)}</span><span>${recent[recent.length-1].date.slice(5)}</span></div>
+    </div>`;
+  }else{
+    html+=`<div class="locked">
+      <div class="n">${3-n}</div>
+      <div class="d">再来 ${3-n} 日<br>可见心相长卷</div>
+    </div>`;
+  }
+
+  // 规律（满7日）
+  if(n>=7){
+    const cnt={};
+    S.days.forEach(d=>cnt[d.k]=(cnt[d.k]||0)+1);
+    const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+    const yin=S.days.filter(d=>BYK[d.k].pole==='阴').length;
+    const avgP=(S.days.reduce((a,d)=>a+d.pad.P,0)/n).toFixed(1);
+    // 星期分布
+    const wd=[0,0,0,0,0,0,0], wc=[0,0,0,0,0,0,0];
+    S.days.forEach(d=>{
+      const w=new Date(d.date).getDay();
+      wd[w]+=d.pad.P; wc[w]++;
+    });
+    let lowW=-1,lowV=99;
+    wd.forEach((v,i)=>{if(wc[i]>=2){const av=v/wc[i];if(av<lowV){lowV=av;lowW=i;}}});
+    const WN=['周日','周一','周二','周三','周四','周五','周六'];
+    html+=`<div class="card">
+      <div class="t">其 六 · 规 律 发 现</div>
+      <div class="h">${n} 日之中</div>
+      <div class="tally">
+        <div><i>最 常 心 相</i><b>${BYK[top[0]].emo}</b></div>
+        <div><i>阴 相 占 比</i><b>${Math.round(yin/n*100)}%</b></div>
+        <div><i>均 值</i><b>${avgP>0?'+':''}${avgP}</b></div>
+      </div>
+      <div class="b" style="margin-top:var(--s4)">
+        ${lowW>=0?`数据显示，<b>${WN[lowW]}</b>是你情绪的低位。若这不是偶然，它值得被安排——把重要的事避开这一天，或在这天给自己多留一点余地。`:'尚未看出明显的周内规律，继续记录。'}
+        ${yin/n>.7?'<br><br>近来阴相偏多。这不是评判——但如果这种状态持续超过两周，请考虑寻求专业帮助。':''}
+      </div>
+    </div>`;
+  }else{
+    html+=`<div class="locked">
+      <div class="n">${7-n}</div>
+      <div class="d">再来 ${7-n} 日<br>可见情绪规律<br><span style="font-size:10px;color:var(--ink-5)">少于七日谈规律，是不诚实的</span></div>
+    </div>`;
+  }
+
+  html+=`<div class="foot">
+    园 无 死 局 　 移 步 自 成 景<br>
+    本页为心理自助与美学体验，不作医疗诊断<br>
+    数据仅存于此设备，清除浏览器数据即消失
+  </div>`;
+  $('#alm-body').innerHTML=html;
+  $('#alm-body').scrollTop=0;
+}
+
+/* 涟漪动画注入 */
+(function(){
+  const st=document.createElement('style');
+  st.textContent='@keyframes rp{to{width:96px;height:96px;margin:-48px 0 0 -48px;opacity:0}}';
+  document.head.appendChild(st);
+})();
+
+/* 启动 */
+setBg('calm'); FX.set('dust');
+if(S.natal){
+  const t=todayKey();
+  const done=S.days.find(d=>d.date===t);
+  if(done) $('#b-gate').textContent='看 年 鉴';
+  else $('#b-gate').textContent='入　园';
+}
 </script>
 </body>
 </html>
-
